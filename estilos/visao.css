@@ -1,0 +1,28 @@
+/* Aba Visão geral: faixa de meses, sequências, destaques. */
+/* faixa de meses */
+.faixa { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.mes { flex: 1 0 56px; display: grid; justify-items: center; gap: 3px; font-size: .75rem; color: var(--mudo); padding: 6px 0; border-radius: 8px; }
+.mes:hover { background: var(--grade); }
+.mes i { width: 16px; height: 16px; border-radius: 50%; background: var(--ok); }
+.mes.perde i { background: var(--bad); }
+.mes b { color: var(--fg); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* sequências */
+.seqs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.seq { background: var(--card2); border-radius: 10px; padding: 12px; display: grid; gap: 2px; }
+.seq b { font-size: 1.9rem; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.seq small { color: var(--mudo); }
+
+/* destaques da visão geral */
+.subtitulo { margin: 4px 0 0; color: var(--mudo); font-size: 1.02rem; }
+.subtitulo b { color: var(--fg); font-weight: 600; }
+.destaques { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.dest { background: var(--card); border: 1px solid var(--borda); border-top: 3px solid var(--borda); border-radius: var(--raio); padding: 14px; display: grid; gap: 6px; align-content: start; min-width: 0; animation: aparecer .4s both; }
+.dest.bom { border-top-color: var(--ok); } .dest.alerta { border-top-color: var(--bad); }
+.dest-nome { font-size: 1.15rem; font-weight: 600; }
+.dest .grande { font-size: 2.2rem; }
+.dest small { color: var(--mudo); font-size: .8rem; }
+.dest-ref { margin-top: 6px; padding-top: 8px; border-top: 1px dashed var(--borda); display: grid; gap: 4px; }
+.dest-ref small b { font-size: 1rem; }
+
+@media (max-width: 560px) { .destaques { grid-template-columns: minmax(0, 1fr); } }

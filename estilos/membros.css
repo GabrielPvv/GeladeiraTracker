@@ -1,0 +1,14 @@
+/* Aba Membros: cards de membro. */
+/* cartões de jogador */
+.pcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 10px; }
+.pc { background: var(--card2); border: 1px solid var(--borda); border-radius: 10px; padding: 12px; display: grid; gap: 6px; min-width: 0; color: inherit; text-decoration: none; transition: transform .15s, border-color .15s; }
+.cartao-link { cursor: pointer; }
+.cartao-link:hover { border-color: var(--acento); transform: translateY(-2px); }
+.pc strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pc .grande { font-size: 1.8rem; }
+.pc .mini { justify-content: space-between; }
+.gcards { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+
+.pc-nome { display: inline-flex; align-items: center; gap: 8px; overflow: hidden; } .pc-nome span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.titulo-membro { display: flex; align-items: center; gap: 12px; }
+a.btn { color: var(--fg); text-decoration: none; display: inline-flex; align-items: center; }

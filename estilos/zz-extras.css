@@ -1,0 +1,23 @@
+/* Extras visuais (frente D). Fonte condensada do sistema (Windows); nenhuma fonte foi baixada. */
+:root { --fonte-num: "Bahnschrift Condensed", "Bahnschrift", "Arial Narrow", sans-serif; }
+.grande, .anel text, .seq b, .dest-nome, h1, .card h2 { font-family: var(--fonte-num); font-variant-numeric: tabular-nums; }
+.grande, .anel text, .seq b { letter-spacing: .01em; }
+
+/* tabela de membros */
+.z-cel { min-width: 74px; }
+.z-v { display: inline-flex; align-items: center; gap: 4px; }
+.z-cel .barra { height: 4px; margin-top: 3px; min-width: 56px; }
+.z-seta { font-size: .85em; font-weight: 700; cursor: help; line-height: 1; }
+.z-seta.ok { color: var(--ok); } .z-seta.bad { color: var(--bad); }
+.z-med { display: inline-flex; cursor: help; }
+.z-medalha { display: block; }
+.z-info { margin-left: 2px; }
+
+/* modo TV */
+html.z-tv, html.z-tv * { cursor: none !important; }
+html.z-tv body { zoom: 1.25; }
+html.z-tv #filtros, html.z-tv .busca, html.z-tv .rodape, html.z-tv #btn-link, html.z-tv #btn-tema, html.z-tv .rot-ano { display: none !important; }
+html.z-tv .grande { font-size: 3.4rem; }
+.z-tv-barra { position: fixed; left: 0; right: 0; bottom: 0; height: 6px; background: var(--grade); z-index: 50; }
+.z-tv-barra i { display: block; height: 100%; width: 0; background: var(--acento); transition: width .25s linear; }
+@media (prefers-reduced-motion: reduce) { .z-tv-barra i { transition: none; } }

@@ -1,0 +1,42 @@
+/* Aba mapas: cartões com fundo próprio por mapa (gradiente + padrão SVG desenhado aqui; nada de imagem oficial do jogo). */
+:root { --mp-veu: rgba(13,16,21,.88); --mp-borda: rgba(255,255,255,.14); }
+@media (prefers-color-scheme: light) { :root:not([data-tema="escuro"]) { --mp-veu: rgba(255,255,255,.91); --mp-borda: rgba(20,30,50,.18); } }
+:root[data-tema="claro"] { --mp-veu: rgba(255,255,255,.91); --mp-borda: rgba(20,30,50,.18); }
+
+.mp-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.mp-cartao { position: relative; display: flex; flex-direction: column; min-width: 0; border-radius: var(--raio); border: 1px solid var(--mp-borda); overflow: hidden; background-color: #4a5668; color: var(--fg); box-shadow: var(--sombra); }
+.mp-topo { padding: 14px 14px 12px; }
+.mp-nome { display: inline-block; margin: 0; padding: 4px 12px; border-radius: 999px; background: var(--mp-veu); color: var(--fg); font-size: 1.35rem; line-height: 1.2; letter-spacing: .01em; }
+.mp-veu { background: var(--mp-veu); margin: 18px 8px 8px; padding: 12px 12px 12px; border-radius: 10px; display: grid; gap: 10px; flex: 1; align-content: start; }
+.mp-wr { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.mp-wr b { font-size: 2rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.mp-wr span { color: var(--mudo); font-size: .82rem; }
+.mp-vd { font-size: .9rem; font-variant-numeric: tabular-nums; }
+.mp-nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 0; }
+.mp-nums div { display: grid; gap: 1px; }
+.mp-nums dt { font-size: .7rem; color: var(--mudo); text-transform: uppercase; letter-spacing: .05em; }
+.mp-nums dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.mp-melhor { display: flex; gap: 8px; align-items: center; border-top: 1px solid var(--mp-borda); padding-top: 10px; min-width: 0; }
+.mp-melhor .tx { display: grid; gap: 1px; min-width: 0; font-size: .82rem; color: var(--mudo); }
+.mp-melhor .tx b { color: var(--fg); font-size: .92rem; overflow-wrap: anywhere; }
+.mp-melhor .rot { grid-column: auto; }
+.mp-selo { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 999px; border: 1px solid var(--aviso); color: var(--aviso); font-size: .7rem; font-weight: 600; white-space: nowrap; }
+.mp-sem { color: var(--mudo); font-size: .82rem; margin: 0; }
+@media (max-width: 420px) { .mp-grade { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: no-preference) {
+  .mp-cartao { transition: transform .2s ease, box-shadow .2s ease; }
+  .mp-cartao:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,.4); }
+}
+
+.mp-mirage { background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='40' viewBox='0 0 24 40'><path d='M2 40V22a10 10 0 0 1 20 0V40' fill='none' stroke='rgba(255,255,255,.22)' stroke-width='2'/><path d='M7 40V24a5 5 0 0 1 10 0V40' fill='rgba(0,0,0,.18)'/></svg>"), linear-gradient(135deg,#e9cb8c,#c48a4a); }
+.mp-dust2 { background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='24' viewBox='0 0 60 24'><path d='M0 18C10 4 20 4 30 18S50 32 60 18' fill='none' stroke='rgba(255,255,255,.22)' stroke-width='2'/><path d='M0 23C10 12 20 12 30 23S50 32 60 23' fill='none' stroke='rgba(0,0,0,.18)' stroke-width='1.5'/></svg>"), linear-gradient(160deg,#ecdcb8,#c7a266); }
+.mp-inferno { background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'><path d='M0 14A14 14 0 0 1 28 14M-14 7A14 14 0 0 1 14 7M14 7A14 14 0 0 1 42 7' fill='none' stroke='rgba(0,0,0,.18)' stroke-width='2'/></svg>"), linear-gradient(150deg,#d4623f,#8c3526); }
+.mp-nuke { background: repeating-linear-gradient(-45deg,rgba(20,20,20,.28) 0 12px,transparent 12px 28px), linear-gradient(150deg,#f7c919,#d99b00); }
+.mp-ancient { background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'><path d='M0 .5H40M0 10.5H40M0 .5V10.5M20 .5V10.5M10 10.5V20M30 10.5V20' fill='none' stroke='rgba(255,255,255,.22)' stroke-width='1.5'/></svg>"), linear-gradient(160deg,#3a7a46,#173a22); }
+.mp-anubis { background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='28' viewBox='0 0 36 28'><path d='M2 26L18 6L34 26Z' fill='none' stroke='rgba(255,215,90,.55)' stroke-width='2'/><path d='M12 26L18 18L24 26' fill='none' stroke='rgba(255,215,90,.55)' stroke-width='1.5'/><circle cx='18' cy='3' r='1.6' fill='rgba(255,215,90,.55)'/></svg>"), linear-gradient(150deg,#22b0a8,#0a5560); }
+.mp-overpass { background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='16' viewBox='0 0 48 16'><path d='M0 8Q12 0 24 8T48 8' fill='none' stroke='rgba(150,215,255,.4)' stroke-width='2'/></svg>"), linear-gradient(180deg,#7890a2 0%,#4a6276 60%,#2f6f98 100%); }
+.mp-cache { background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'><g fill='rgba(0,0,0,.18)'><path d='M30 30L23 17.9A14 14 0 0 1 37 17.9Z'/><path d='M30 30L44 30A14 14 0 0 1 37 42.1Z'/><path d='M30 30L23 42.1A14 14 0 0 1 16 30Z'/><circle cx='30' cy='30' r='3'/></g></svg>"), linear-gradient(150deg,#78883f,#38421e); }
+.mp-vertigo { background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='40' viewBox='0 0 60 40'><rect x='2' y='14' width='12' height='26' fill='rgba(255,255,255,.22)'/><rect x='16' y='4' width='14' height='36' fill='rgba(0,0,0,.18)'/><rect x='32' y='20' width='10' height='20' fill='rgba(255,255,255,.22)'/><rect x='44' y='10' width='14' height='30' fill='rgba(0,0,0,.18)'/></svg>"), linear-gradient(180deg,#8ccbf5,#3a82c2); }
+.mp-train { background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M0 6H24M0 18H24' stroke='rgba(255,255,255,.22)' stroke-width='2'/><path d='M4 2V22M16 2V22' stroke='rgba(0,0,0,.18)' stroke-width='3'/></svg>"), linear-gradient(160deg,#868b93,#464b53); }
+.mp-cbble { background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='10' viewBox='0 0 24 10'><path d='M0 10V0H12V10Z' fill='rgba(0,0,0,.22)'/></svg>") repeat-x 0 0, url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='18' viewBox='0 0 28 18'><rect x='1' y='1' width='12' height='7' rx='3' fill='none' stroke='rgba(0,0,0,.18)' stroke-width='1.5'/><rect x='15' y='1' width='12' height='7' rx='3' fill='none' stroke='rgba(0,0,0,.18)' stroke-width='1.5'/><rect x='8' y='10' width='12' height='7' rx='3' fill='none' stroke='rgba(0,0,0,.18)' stroke-width='1.5'/></svg>"), linear-gradient(160deg,#958f80,#575245); }
+.mp-neutro { background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'><circle cx='8' cy='8' r='1.3' fill='rgba(255,255,255,.22)'/></svg>"), linear-gradient(150deg,#566175,#2c3442); }

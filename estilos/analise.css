@@ -1,0 +1,67 @@
+/* Aba Análise e o "card de jogador" (também usado no topo da página do membro). Só tokens do base.css. */
+.sel-membros { display: flex; flex-wrap: wrap; gap: 6px; }
+.sel-membros .chip-m { padding: 4px 12px 4px 4px; font-size: .88rem; }
+.sel-membros .chip-m.ativo { border-color: var(--acento); background: color-mix(in srgb, var(--acento) 18%, var(--card2)); }
+
+.jogador-card { background: var(--card); border: 1px solid var(--borda); border-radius: var(--raio); padding: 16px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 300px); gap: 12px 20px; align-items: center; }
+.jc-esq { display: grid; gap: 12px; min-width: 0; }
+.jc-quem { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.jc-id { display: grid; gap: 2px; min-width: 0; }
+.jc-nome { font-size: 1.8rem; letter-spacing: -.01em; overflow-wrap: anywhere; }
+.jc-id .mudo { font-size: .85rem; }
+.jc-funcao { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.jc-funcao b { font-size: 1.15rem; color: var(--acento); }
+.jc-funcao small { color: var(--mudo); }
+.jc-nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.jc-num { background: var(--card2); border: 1px solid var(--borda); border-radius: 10px; padding: 10px 8px; display: grid; gap: 2px; justify-items: center; text-align: center; min-width: 0; }
+.jc-num .grande { font-size: 2.1rem; }
+.jc-num small { font-size: .75rem; }
+.jogador-card > .nota, .jc-esq > .nota { margin: 0; }
+
+.radar-box { margin: 0; display: grid; gap: 4px; justify-items: center; }
+.radar { width: 100%; max-width: 300px; height: auto; display: block; overflow: visible; }
+.radar-anel { fill: none; stroke: var(--grade); stroke-width: 1; }
+.radar-media { fill: none; stroke: var(--ref); stroke-width: 1.4; stroke-dasharray: 4 3; }
+.radar-eixo { stroke: var(--grade); stroke-width: 1; }
+.radar-area { fill: color-mix(in srgb, var(--acento) 30%, transparent); stroke: var(--acento); stroke-width: 2; stroke-linejoin: round; }
+.radar-ponto { fill: var(--acento); stroke: var(--card); stroke-width: 2; cursor: help; }
+.radar-ponto:focus-visible { outline: 2px solid var(--fg); }
+.radar-box .legenda { justify-content: center; align-items: center; }
+.lg-jogador { background: var(--acento); }
+.lg-media { background: transparent; border: 1.5px dashed var(--ref); border-radius: 50%; }
+
+.resumo { display: grid; gap: 8px; }
+.resumo p { margin: 0; max-width: 80ch; }
+
+.pontos { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ponto-item { background: var(--card2); border-radius: 10px; border-left: 3px solid var(--ok); padding: 8px 10px; display: grid; gap: 3px; min-width: 0; }
+.ponto-item.fraco { border-left-color: var(--bad); }
+.pi-topo { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 6px; }
+.pi-topo .selo { margin-left: auto; }
+.pi-nums { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; font-variant-numeric: tabular-nums; }
+.pi-v { font-size: 1.15rem; font-weight: 600; }
+.pi-dif { font-size: .82rem; font-weight: 600; }
+
+.recs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 12px; }
+.rec { background: var(--card2); border-radius: 10px; padding: 12px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.rec h3 { font-size: 1rem; color: var(--acento); }
+.rec p { margin: 0; }
+.rec ul { margin: 4px 0 0; padding-left: 18px; display: grid; gap: 3px; }
+.acomp { font-size: .88rem; border-top: 1px solid var(--borda); padding-top: 6px; }
+
+.funcoes > div.topo .nome { font-weight: 600; }
+.porque { background: var(--card2); border-radius: 10px; padding: 12px; display: grid; gap: 6px; }
+.porque h3 { font-size: .95rem; }
+.porque ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: .88rem; }
+
+.bloco-mapas { display: grid; gap: 8px; }
+.limites { margin: 0; padding-left: 18px; display: grid; gap: 6px; max-width: 85ch; }
+.limites .aviso { list-style: none; margin-left: -18px; color: var(--mudo); }
+
+@media (max-width: 640px) {
+  .jogador-card { grid-template-columns: minmax(0, 1fr); padding: 12px; }
+  .jc-nome { font-size: 1.5rem; }
+  .jc-num .grande { font-size: 1.7rem; }
+  .jc-nums { gap: 6px; }
+}
+#filtros:empty { display: none; }
