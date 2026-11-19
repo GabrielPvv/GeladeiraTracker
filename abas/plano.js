@@ -112,14 +112,15 @@
     const lista2 = D.length && GT.planoDemos ? GT.planoDemos.grupos(D)
       : h('p', { class: 'vazio' }, s.n < MIN ? `Só ${pl(s.n, 'partida', 'partidas')} neste mapa no filtro; as dicas aparecem a partir de ${MIN}.` : 'Nada fora do normal neste mapa: os números estão parecidos com os dos adversários.');
     const mb = membrosNoMapa(ctx, m);
-    const quem = mb.length >= 2 ? h('div', { class: 'pl-quem' },
-      h('div', { class: 'rs-dest forte' }, h('span', { class: 'rot' }, 'Rendem mais aqui'), ...mb.filter((x) => x.dif > 0.03).slice(0, 3).map((x) => h('span', { class: 'pl-membro' }, avatar(x.n, 20), ` ${x.n} · ADR ${x.adr.toFixed(1)} (+${Math.round(x.dif * 100)}% do próprio)`))),
-      h('div', { class: 'rs-dest fraco' }, h('span', { class: 'rot' }, 'Sofrem mais aqui'), ...mb.filter((x) => x.dif < -0.03).slice(-3).reverse().map((x) => h('span', { class: 'pl-membro' }, avatar(x.n, 20), ` ${x.n} · ADR ${x.adr.toFixed(1)} (${Math.round(x.dif * 100)}% do próprio)`))))
+    // Só o lado positivo: quem rende acima do próprio ADR neste mapa.
+    const destaques = mb.filter((x) => x.dif > 0.03).slice(0, 3);
+    const quem = destaques.length ? h('div', { class: 'pl-quem' },
+      h('div', { class: 'rs-dest forte' }, h('span', { class: 'rot' }, 'Rendem mais aqui'), ...destaques.map((x) => h('span', { class: 'pl-membro' }, avatar(x.n, 20), ` ${x.n} · ADR ${x.adr.toFixed(1)} (+${Math.round(x.dif * 100)}% do próprio)`))))
       : null;
     el.append(card(nome(m), `${pl(s.n, 'partida', 'partidas')} da Geladeira no filtro (${s.v}V ${s.d}D).`, kpis,
       h('h3', { class: 'adv-sub' }, 'Pontos fortes e o que trabalhar (todas as partidas do filtro)'), lista2,
       ...(GT.planoDemos ? GT.planoDemos.mapa(ctx, m) : []),
-      quem && h('h3', { class: 'adv-sub' }, 'Quem rende mais e menos neste mapa'), quem,
+      quem && h('h3', { class: 'adv-sub' }, 'Quem rende mais neste mapa'), quem,
       h('p', { class: 'nota' }, 'Números somados do time inteiro da Geladeira (incluindo quem completa a line) e do adversário, nas mesmas partidas. "Rendem mais aqui": ADR do membro neste mapa contra o ADR dele em todos os mapas do filtro (4 partidas ou mais no mapa).')));
   } });
 })();
