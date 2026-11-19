@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
-<!-- Segurança: só roda script e estilo do próprio site; nada de rede, formulário nem iframe. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<!-- Segurança: só roda script e estilo do próprio site; nada de rede nem formulário; a única janela (iframe) permitida é a do csnades.gg, para ver o vídeo de um lineup. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src https://csnades.gg">
 <meta name="referrer" content="no-referrer">
 <!-- Não aparecer em buscadores. -->
 <meta name="robots" content="noindex, nofollow, noarchive">
@@ -64,6 +64,7 @@
 <script src="abas/estilo.js"></script>
 <script src="abas/granadas-dados.js"></script>
 <script src="abas/granadas-grupo.js"></script>
+<script src="abas/granadas-pros.js"></script>
 <script src="abas/granadas.js"></script>
 <script src="abas/home.js"></script>
 <script src="abas/lines.js"></script>
