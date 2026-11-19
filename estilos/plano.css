@@ -1,0 +1,22 @@
+/* Aba Plano por mapa (usa .gr-mapas da aba Granadas e .rs-* do visual.css). */
+.pl-veto { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 12px; }
+.pl-veto-col { border-radius: 12px; padding: 12px; display: grid; gap: 8px; align-content: start; }
+.pl-veto-col h3 { font-size: .85rem; text-transform: uppercase; letter-spacing: .05em; }
+.pl-veto-col.mais { background: color-mix(in srgb, var(--ok) 9%, var(--card2)); border: 1px solid color-mix(in srgb, var(--ok) 35%, var(--borda)); }
+.pl-veto-col.mais h3 { color: var(--ok); }
+.pl-veto-col.menos { background: color-mix(in srgb, var(--bad) 9%, var(--card2)); border: 1px solid color-mix(in srgb, var(--bad) 35%, var(--borda)); }
+.pl-veto-col.menos h3 { color: var(--bad); }
+.pl-veto-lista { display: grid; gap: 6px; }
+.pl-veto-item { display: grid; gap: 1px; padding: 8px 10px; border-radius: 9px; background: var(--card); text-decoration: none; color: var(--fg); }
+.pl-veto-item:hover { outline: 1px solid var(--acento); }
+.pl-veto-item small { color: var(--mudo); }
+.pl-dicas { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.pl-dica { --k: var(--c1); display: grid; grid-template-columns: 34px 1fr; gap: 10px; padding: 10px 12px; border-radius: 12px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--k) 14%, var(--card2)), var(--card2)); border-left: 4px solid var(--k); }
+.pl-dica.forte { --k: var(--ok); } .pl-dica.mais { --k: var(--ok); } .pl-dica.menos { --k: var(--bad); } .pl-dica.nade { --k: var(--c4); } .pl-dica.atencao { --k: var(--aviso); }
+.pl-ico { width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; background: color-mix(in srgb, var(--k) 25%, transparent); color: var(--k); }
+.pl-dica p { margin: 2px 0 4px; color: var(--mudo); font-size: .88rem; }
+.pl-link { font-weight: 700; font-size: .85rem; color: var(--acento); text-decoration: none; }
+.pl-link:hover { text-decoration: underline; }
+.pl-quem { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 10px; }
+.pl-membro { display: flex; align-items: center; gap: 4px; font-size: .88rem; }
