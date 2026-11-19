@@ -51,3 +51,9 @@
 .gr-modal-caixa .nota { margin: 0; }
 html.gr-modal-aberto { overflow: hidden; }
 @media (max-width: 560px) { .gr-modal { padding: 0; } .gr-modal-caixa { height: 100vh; border-radius: 0; } }
+.gr-credito a { color: var(--acento); }
+.gr-modal-yt { width: 100%; aspect-ratio: 16 / 9; height: auto; max-height: 72vh; border: 0; border-radius: 10px; background: #000; }
+.gr-modal-caixa.com-yt { height: auto; max-height: 94vh; grid-template-rows: auto auto auto; }
+.gr-yt-info { display: grid; gap: 2px; }
+.gr-yt-info b { font-size: .95rem; }
+.gr-yt-link { font-family: ui-monospace, Consolas, monospace; word-break: break-all; }
