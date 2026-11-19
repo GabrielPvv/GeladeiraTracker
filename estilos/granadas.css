@@ -57,3 +57,4 @@ html.gr-modal-aberto { overflow: hidden; }
 .gr-yt-info { display: grid; gap: 2px; }
 .gr-yt-info b { font-size: .95rem; }
 .gr-yt-link { font-family: ui-monospace, Consolas, monospace; word-break: break-all; }
+.gr-yt-inicio { color: var(--acento); font-weight: 600; }
