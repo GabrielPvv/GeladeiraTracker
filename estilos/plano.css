@@ -20,3 +20,21 @@
 .pl-link:hover { text-decoration: underline; }
 .pl-quem { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 10px; }
 .pl-membro { display: flex; align-items: center; gap: 4px; font-size: .88rem; }
+.pl-lados { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 12px; }
+.pl-lado { display: grid; gap: 6px; align-content: start; padding: 10px 12px; border-radius: 12px; background: var(--card2); }
+.pl-lado h4 { margin: 0; font-size: .95rem; }
+.pl-lado h4 small { color: var(--mudo); font-weight: 400; font-size: .78rem; }
+.pl-locais { display: grid; gap: 5px; }
+.pl-local { display: grid; grid-template-columns: minmax(80px, 8.5em) 1fr 3em; gap: 8px; align-items: center; font-size: .85rem; }
+.pl-local-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pl-local-barra { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--grade); }
+.pl-local-barra .g { background: var(--ok); } .pl-local-barra .p { background: var(--bad); }
+.pl-local small { text-align: right; color: var(--mudo); font-variant-numeric: tabular-nums; }
+.pl-gr th, .pl-gr td { text-align: center; } .pl-gr th:first-child, .pl-gr td:first-child { text-align: left; }
+.pl-grupos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 12px; align-items: start; }
+.pl-grupo { display: grid; gap: 8px; padding: 10px; border-radius: 14px; }
+.pl-grupo h4 { margin: 0; font-size: .82rem; text-transform: uppercase; letter-spacing: .05em; }
+.pl-grupo.bom { background: color-mix(in srgb, var(--ok) 6%, transparent); border: 1px solid color-mix(in srgb, var(--ok) 30%, var(--borda)); }
+.pl-grupo.bom h4 { color: var(--ok); }
+.pl-grupo.ruim { background: color-mix(in srgb, var(--aviso) 6%, transparent); border: 1px solid color-mix(in srgb, var(--aviso) 30%, var(--borda)); }
+.pl-grupo.ruim h4 { color: var(--aviso); }

@@ -41,8 +41,8 @@
     const pp = (x) => `${x > 0 ? '+' : ''}${Math.round(x * 100)}`;
     if (s.esp !== null) {
       const dif = s.wr - s.esp;
+      // Só o lado bom vira dica: render abaixo do esperado aparece no win rate e nas dicas do que melhorar, não como "não jogue".
       if (dif >= 0.06) add(dif * 3, 'mais', 'Explorar mais: rende acima do esperado', `Win rate de ${pct(s.wr)} quando a GC esperava ${pct(s.esp)} (${pp(dif)} pontos). Bom mapa para puxar no veto.`);
-      else if (dif <= -0.06) add(-dif * 3, 'menos', 'Explorar menos: rende abaixo do esperado', `Win rate de ${pct(s.wr)} quando a GC esperava ${pct(s.esp)} (${pp(dif)} pontos). Banir enquanto não treinar, ou treinar antes de puxar.`);
     }
     if (s.abertura < 0.47) add((0.5 - s.abertura) * 6, 'atencao', 'Perde a abertura', `A Geladeira pega só ${pct(s.abertura)} dos primeiros abates. Entrar com flash, jogar o 1º duelo em dupla para trocar, e usar smoke para cortar os ângulos de quem segura.`, linkGranadas(mapa, 'smokes', 'T', 'Smokes de T'));
     else if (s.abertura > 0.53 && s.esp !== null && s.wr < s.esp) add((s.abertura - 0.5) * 4, 'atencao', 'Ganha a abertura, mas não converte', `${pct(s.abertura)} dos primeiros abates são da Geladeira e mesmo assim o resultado fica abaixo do esperado: falta trocar as mortes seguintes e segurar o pós-plant.`, linkGranadas(mapa, 'molotovs', 'T', 'Molotovs de pós-plant'));
@@ -92,8 +92,9 @@
     el.append(card('Veto da Geladeira', `Comparação do win rate com a previsão de vitória que a GC mostrava antes de cada partida (mapas com ${MIN} partidas ou mais no filtro).`,
       h('div', { class: 'pl-veto' },
         h('div', { class: 'pl-veto-col mais' }, h('h3', null, '↑ Jogar mais'), mais.length ? h('div', { class: 'pl-veto-lista' }, ...mais.map(itemVeto)) : h('p', { class: 'nota' }, 'Nenhum mapa bem acima do esperado.')),
-        h('div', { class: 'pl-veto-col menos' }, h('h3', null, '↓ Jogar menos / banir'), menos.length ? h('div', { class: 'pl-veto-lista' }, ...menos.map(itemVeto)) : h('p', { class: 'nota' }, 'Nenhum mapa bem abaixo do esperado.')))));
+        h('div', { class: 'pl-veto-col menos' }, h('h3', null, '↓ Precisa de treino'), menos.length ? h('div', { class: 'pl-veto-lista' }, ...menos.map(itemVeto)) : h('p', { class: 'nota' }, 'Nenhum mapa bem abaixo do esperado.')))));
 
+    const G0 = GT.planoDemos ? GT.planoDemos.geral(ctx) : null; if (G0) el.append(G0);
     if (!UI.planoMapa || !lista.some(([m]) => m === UI.planoMapa)) UI.planoMapa = lista[0][0];
     el.append(h('nav', { class: 'gr-mapas', 'aria-label': 'Escolher mapa' }, ...lista.map(([m, s]) => h('a', { class: 'gr-mapa' + (m === UI.planoMapa ? ' ativo' : ''), href: '#plano/' + m + '?' + GT.u.paramsTexto(), 'aria-current': m === UI.planoMapa ? 'page' : null },
       h('b', null, nome(m)), h('small', null, `${pl(s.n, 'partida', 'partidas')} · ${pct(s.wr)}`)))));
@@ -108,8 +109,7 @@
       kpi('Desarmes', `${s.desarmeN.toFixed(1)} × ${s.desarmeE.toFixed(1)}`, 'por partida: Geladeira × adversário', comp(s.desarmeN, s.desarmeE, 0.12), 'var(--c6)', 'Desarmes medem o retake: retomar o bomb depois que o adversário plantou.'),
       kpi('K/D do time', s.kdN.toFixed(2), `adversário: ${s.kdE.toFixed(2)}`, comp(s.kdN, s.kdE, 0.04), 'var(--c1)'),
       s.nivelD !== null && kpi('Nível médio', `${s.nivelD > 0 ? '+' : ''}${s.nivelD.toFixed(1)}`, 'Geladeira menos adversário', null, 'var(--c2)'));
-    const lista2 = D.length ? h('ol', { class: 'pl-dicas' }, ...D.map((d) => h('li', { class: 'pl-dica ' + d.tipo },
-      h('span', { class: 'pl-ico', 'aria-hidden': 'true' }, ICONE[d.tipo]), h('div', null, h('b', null, d.titulo), h('p', null, d.texto), d.extra))))
+    const lista2 = D.length && GT.planoDemos ? GT.planoDemos.grupos(D)
       : h('p', { class: 'vazio' }, s.n < MIN ? `Só ${pl(s.n, 'partida', 'partidas')} neste mapa no filtro; as dicas aparecem a partir de ${MIN}.` : 'Nada fora do normal neste mapa: os números estão parecidos com os dos adversários.');
     const mb = membrosNoMapa(ctx, m);
     const quem = mb.length >= 2 ? h('div', { class: 'pl-quem' },
@@ -117,7 +117,8 @@
       h('div', { class: 'rs-dest fraco' }, h('span', { class: 'rot' }, 'Sofrem mais aqui'), ...mb.filter((x) => x.dif < -0.03).slice(-3).reverse().map((x) => h('span', { class: 'pl-membro' }, avatar(x.n, 20), ` ${x.n} · ADR ${x.adr.toFixed(1)} (${Math.round(x.dif * 100)}% do próprio)`))))
       : null;
     el.append(card(nome(m), `${pl(s.n, 'partida', 'partidas')} da Geladeira no filtro (${s.v}V ${s.d}D).`, kpis,
-      h('h3', { class: 'adv-sub' }, 'Dicas para o time'), lista2,
+      h('h3', { class: 'adv-sub' }, 'Pontos fortes e o que trabalhar (todas as partidas do filtro)'), lista2,
+      ...(GT.planoDemos ? GT.planoDemos.mapa(ctx, m) : []),
       quem && h('h3', { class: 'adv-sub' }, 'Quem rende mais e menos neste mapa'), quem,
       h('p', { class: 'nota' }, 'Números somados do time inteiro da Geladeira (incluindo quem completa a line) e do adversário, nas mesmas partidas. "Rendem mais aqui": ADR do membro neste mapa contra o ADR dele em todos os mapas do filtro (4 partidas ou mais no mapa).')));
   } });

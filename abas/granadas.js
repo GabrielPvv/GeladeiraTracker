@@ -1,8 +1,8 @@
 // Aba "Granadas": por mapa que a Geladeira joga, duas visões:
 //   "Essenciais": seleção curada (execução de bomb, meio, atraso de CT) com link para o csnades.gg (abas\granadas-dados.js);
 //   "Dos pros":   ranking "Best" do nades.ai por tipo, tirado de partidas profissionais (abas\granadas-pros.js).
-// Os lineups do csnades.gg abrem numa janela por cima do site (a própria página deles, num iframe: vídeo, marca e anúncios
-// deles); os do nades.ai abrem em nova aba. Nenhum vídeo ou imagem de terceiros é copiado para cá.
+// Cada granada essencial abre numa janela por cima do site: o vídeo do YouTube escolhido para ela (player oficial de incorporação)
+// ou, sem vídeo, a página dela no csnades.gg. Os do nades.ai abrem em nova aba. Nenhum vídeo ou imagem de terceiros é copiado para cá.
 (function () {
   'use strict';
   const GT = window.GT, C = GT.C;
@@ -23,20 +23,38 @@
     rotaLer(resto) { UI.granMapa = resto[0] || UI.granMapa || null; if (resto[1] === 'pros' || resto[1] === 'essenciais') UI.granFonte = resto[1]; },
     rotaEscrever() { return UI.granMapa ? '/' + UI.granMapa + (UI.granFonte === 'pros' ? '/pros' : '') : ''; } });
 
-  // ---------- janela do lineup (página do csnades.gg num iframe por cima do site) ----------
+  // ---------- janela do lineup ----------
+  // Granada com vídeo do YouTube (campo yt, escolhido em ferramentas\granadas-youtube.json): o vídeo toca aqui, na janela, pelo
+  // player oficial de incorporação (youtube-nocookie), mudo e sozinho; o endereço do YouTube fica escrito embaixo, só informativo.
+  // Sem yt: a janela mostra a página da granada no csnades.gg. Clicar no cartão nunca abre outra aba nem outra página.
+  const YT_EMBED = 'https://www.youtube-nocookie.com/embed/', YT_VER = 'https://www.youtube.com/watch?v=';
+  const idYT = (n) => (n && typeof n.yt === 'string' && /^[A-Za-z0-9_-]{11}$/.test(n.yt) ? n.yt : null);
   let janela = null, voltarFoco = null;
   function fecharJanela() { if (!janela) return; janela.remove(); janela = null; document.documentElement.classList.remove('gr-modal-aberto'); if (voltarFoco) voltarFoco.focus(); }
-  function abrirJanela(url, titulo) {
+  function abrirJanela(n) {
     fecharJanela(); voltarFoco = document.activeElement;
+    const titulo = `${n.alvo} · de ${n.de} (${TIPOS[n.tipo].rot})`, url = BASE + n.url, yt = idYT(n);
     const fechar = h('button', { type: 'button', class: 'btn', onclick: fecharJanela }, 'Fechar');
+    const corpo = yt
+      ? h('iframe', { class: 'gr-modal-yt', src: `${YT_EMBED}${yt}?autoplay=1&mute=1&playsinline=1&rel=0`, title: `Vídeo do lineup: ${n.ytTitulo || titulo}`,
+        allow: 'autoplay; encrypted-media; picture-in-picture; fullscreen', allowfullscreen: true, referrerpolicy: 'strict-origin-when-cross-origin', loading: 'eager' })
+      : h('iframe', { class: 'gr-modal-frame', src: url, title: `Lineup no csnades.gg: ${titulo}`, loading: 'eager', referrerpolicy: 'no-referrer', allow: 'autoplay; fullscreen' });
+    const info = yt
+      ? h('div', { class: 'gr-yt-info' },
+        h('b', null, n.ytTitulo || titulo),
+        h('small', { class: 'mudo' }, `Vídeo de ${n.ytCanal || 'um canal'} no YouTube · `, h('a', { class: 'gr-yt-link', href: YT_VER + yt, target: '_blank', rel: 'noopener noreferrer' }, `youtube.com/watch?v=${yt}`)),
+        h('small', { class: 'mudo' }, 'Lineup listado pelo ', h('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }, 'csnades.gg'), '.'))
+      : h('p', { class: 'nota gr-credito' }, 'Página e vídeo do csnades.gg. Se não carregar, use "Abrir no csnades.gg".');
     janela = h('div', { class: 'gr-modal', role: 'dialog', 'aria-modal': 'true', 'aria-label': titulo },
       h('div', { class: 'gr-modal-fundo', onclick: fecharJanela }),
-      h('div', { class: 'gr-modal-caixa' },
+      h('div', { class: 'gr-modal-caixa' + (yt ? ' com-yt' : '') },
         h('div', { class: 'gr-modal-topo' }, h('b', null, titulo),
-          h('div', { class: 'gr-modal-acoes' }, h('a', { class: 'btn', href: url, target: '_blank', rel: 'noopener noreferrer' }, 'Abrir no csnades.gg ↗'), fechar)),
-        h('iframe', { class: 'gr-modal-frame', src: url, title: `Lineup no csnades.gg: ${titulo}`, loading: 'eager', referrerpolicy: 'no-referrer', allow: 'autoplay; fullscreen' }),
-        h('p', { class: 'nota' }, 'Página e vídeo do csnades.gg. Se não carregar, use "Abrir no csnades.gg".')));
-    document.body.append(janela); document.documentElement.classList.add('gr-modal-aberto'); fechar.focus();
+          h('div', { class: 'gr-modal-acoes' },
+            yt && h('a', { class: 'btn', href: YT_VER + yt, target: '_blank', rel: 'noopener noreferrer' }, 'Abrir no YouTube ↗'),
+            h('a', { class: 'btn', href: url, target: '_blank', rel: 'noopener noreferrer' }, yt ? 'Ver no csnades.gg ↗' : 'Abrir no csnades.gg ↗'), fechar)),
+        corpo, info));
+    document.body.append(janela); document.documentElement.classList.add('gr-modal-aberto');
+    fechar.focus();
   }
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && janela) fecharJanela(); });
 
@@ -54,16 +72,17 @@
 
   // Cartão do csnades.gg (abre na janela) ou do grupo (abre o clipe em nova aba).
   const cartao = (n) => {
-    const link = n.grupo ? linkSeguro(n.link) : BASE + n.url;
-    const el = h(link ? 'a' : 'div', { class: 'gr-nade' + (n.grupo ? ' grupo' : ''), href: link, target: link ? '_blank' : null, rel: link ? 'noopener noreferrer' : null, estilo: `--k:${TIPOS[n.tipo].cor}`,
+    // Cartão de granada: o href só serve ao Ctrl+clique (YouTube ou csnades.gg); o clique normal abre a janela aqui. Do grupo: o clipe, em nova aba.
+    const link = n.grupo ? linkSeguro(n.link) : idYT(n) ? YT_VER + idYT(n) : BASE + n.url;
+    const el = h(link ? 'a' : 'div', { class: 'gr-nade' + (n.grupo ? ' grupo' : ''), href: link, target: link && n.grupo ? '_blank' : null, rel: link ? 'noopener noreferrer' : null, estilo: `--k:${TIPOS[n.tipo].cor}`,
       title: n.grupo ? `Lineup da Geladeira${n.quem ? ' (' + n.quem + ')' : ''}` : `Ver o lineup (${n.alvo} from ${n.de})` },
       topoCartao(n, [n.top && h('span', { class: 'gr-top', title: 'Está no ranking Top do csnades.gg' }, '★ popular'), n.grupo && h('span', { class: 'gr-top gr-grupo' }, '❄ Geladeira')]),
       h('b', { class: 'gr-alvo' }, n.alvo), h('small', { class: 'gr-de' }, `de ${n.de}`),
       h('p', null, desc(n)),
       n.grupo ? h('span', { class: 'gr-ver' }, link ? 'Ver clipe ↗' : 'sem clipe', n.quem && h('small', null, ` · achada por ${n.quem}`))
-        : h('span', { class: 'gr-ver' }, '▶ Ver lineup', n.variacoes > 1 && h('small', null, ` · ${n.variacoes} jeitos`)));
-    // Clique normal abre a janela; Ctrl/clique do meio continua abrindo em nova aba.
-    if (!n.grupo) el.addEventListener('click', (e) => { if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return; e.preventDefault(); abrirJanela(link, `${n.alvo} · de ${n.de} (${TIPOS[n.tipo].rot})`); });
+        : h('span', { class: 'gr-ver' }, idYT(n) ? '▶ Ver vídeo aqui' : '▶ Ver lineup', n.variacoes > 1 && h('small', null, ` · ${n.variacoes} jeitos`)));
+    // Clique normal abre a janela; Ctrl/clique do meio continua abrindo a página do csnades.gg em nova aba.
+    if (!n.grupo) el.addEventListener('click', (e) => { if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return; e.preventDefault(); abrirJanela(n); });
     return el;
   };
   // Cartão dos pros (nades.ai, nova aba: o site deles não pode ser conferido para abrir em janela).
@@ -129,7 +148,7 @@
       corpo = lista.length
         ? h('div', { class: 'gr-areas' }, ...AREAS.map((a) => { const da = lista.filter((n) => n.area === a); return da.length ? h('section', { class: 'gr-area' }, h('h3', null, a, h('small', null, ` · ${da.length}`)), h('div', { class: 'gr-lista' }, ...da.map(cartao))) : null; }))
         : h('p', { class: 'vazio' }, mapa.novo && !doGrupo(UI.granMapa).length ? 'Ainda sem lineups da Geladeira neste mapa. Quem achar uma smoke boa manda o clipe no grupo para entrar aqui.' : 'Nenhuma granada com esse filtro.');
-      nota = 'Lineups e vídeos: csnades.gg (cada granada abre a página dela aqui, numa janela; Ctrl+clique abre em nova aba). "★ popular" = está no ranking Top do csnades.gg. A divisão por bomb e lado é uma orientação; confira o lineup no vídeo.';
+      nota = 'Lineups listados pelo csnades.gg. Os vídeos são do YouTube, de cada canal (o nome aparece na janela), e tocam aqui no site pelo player do YouTube; granada sem vídeo do YouTube abre a página dela no csnades.gg. "★ popular" = está no ranking Top do csnades.gg. A divisão por bomb e lado é uma orientação; confira o lineup no vídeo.';
     }
     el.append(card(mapa.nome, null, resumo, avisoNovo, fontes, filtros, corpo, h('p', { class: 'nota' }, nota)));
   } });
