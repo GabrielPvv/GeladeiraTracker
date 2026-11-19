@@ -34,15 +34,20 @@
   function abrirJanela(n) {
     fecharJanela(); voltarFoco = document.activeElement;
     const titulo = `${n.alvo} · de ${n.de} (${TIPOS[n.tipo].rot})`, url = BASE + n.url, yt = idYT(n);
+    // Compilado: o vídeo começa no capítulo da granada.
+    const ini = yt && Number.isInteger(n.ytInicio) && n.ytInicio > 0 ? n.ytInicio : 0;
+    const mmss = `${Math.floor(ini / 60)}:${String(ini % 60).padStart(2, '0')}`;
+    const verYT = yt ? YT_VER + yt + (ini ? `&t=${ini}s` : '') : null;
     const fechar = h('button', { type: 'button', class: 'btn', onclick: fecharJanela }, 'Fechar');
     const corpo = yt
-      ? h('iframe', { class: 'gr-modal-yt', src: `${YT_EMBED}${yt}?autoplay=1&mute=1&playsinline=1&rel=0`, title: `Vídeo do lineup: ${n.ytTitulo || titulo}`,
+      ? h('iframe', { class: 'gr-modal-yt', src: `${YT_EMBED}${yt}?autoplay=1&mute=1&playsinline=1&rel=0${ini ? `&start=${ini}` : ''}`, title: `Vídeo do lineup: ${n.ytTitulo || titulo}`,
         allow: 'autoplay; encrypted-media; picture-in-picture; fullscreen', allowfullscreen: true, referrerpolicy: 'strict-origin-when-cross-origin', loading: 'eager' })
       : h('iframe', { class: 'gr-modal-frame', src: url, title: `Lineup no csnades.gg: ${titulo}`, loading: 'eager', referrerpolicy: 'no-referrer', allow: 'autoplay; fullscreen' });
     const info = yt
       ? h('div', { class: 'gr-yt-info' },
         h('b', null, n.ytTitulo || titulo),
-        h('small', { class: 'mudo' }, `Vídeo de ${n.ytCanal || 'um canal'} no YouTube · `, h('a', { class: 'gr-yt-link', href: YT_VER + yt, target: '_blank', rel: 'noopener noreferrer' }, `youtube.com/watch?v=${yt}`)),
+        ini ? h('small', { class: 'gr-yt-inicio' }, `▶ Começa em ${mmss}${n.ytCapitulo ? ` (capítulo "${n.ytCapitulo}" do vídeo)` : ' (capítulo do vídeo)'}`) : null,
+        h('small', { class: 'mudo' }, `Vídeo de ${n.ytCanal || 'um canal'} no YouTube · `, h('a', { class: 'gr-yt-link', href: verYT, target: '_blank', rel: 'noopener noreferrer' }, `youtube.com/watch?v=${yt}${ini ? `&t=${ini}s` : ''}`)),
         h('small', { class: 'mudo' }, 'Lineup listado pelo ', h('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }, 'csnades.gg'), '.'))
       : h('p', { class: 'nota gr-credito' }, 'Página e vídeo do csnades.gg. Se não carregar, use "Abrir no csnades.gg".');
     janela = h('div', { class: 'gr-modal', role: 'dialog', 'aria-modal': 'true', 'aria-label': titulo },
@@ -50,7 +55,7 @@
       h('div', { class: 'gr-modal-caixa' + (yt ? ' com-yt' : '') },
         h('div', { class: 'gr-modal-topo' }, h('b', null, titulo),
           h('div', { class: 'gr-modal-acoes' },
-            yt && h('a', { class: 'btn', href: YT_VER + yt, target: '_blank', rel: 'noopener noreferrer' }, 'Abrir no YouTube ↗'),
+            yt && h('a', { class: 'btn', href: verYT, target: '_blank', rel: 'noopener noreferrer' }, 'Abrir no YouTube ↗'),
             h('a', { class: 'btn', href: url, target: '_blank', rel: 'noopener noreferrer' }, yt ? 'Ver no csnades.gg ↗' : 'Abrir no csnades.gg ↗'), fechar)),
         corpo, info));
     document.body.append(janela); document.documentElement.classList.add('gr-modal-aberto');
@@ -73,7 +78,7 @@
   // Cartão do csnades.gg (abre na janela) ou do grupo (abre o clipe em nova aba).
   const cartao = (n) => {
     // Cartão de granada: o href só serve ao Ctrl+clique (YouTube ou csnades.gg); o clique normal abre a janela aqui. Do grupo: o clipe, em nova aba.
-    const link = n.grupo ? linkSeguro(n.link) : idYT(n) ? YT_VER + idYT(n) : BASE + n.url;
+    const link = n.grupo ? linkSeguro(n.link) : idYT(n) ? YT_VER + idYT(n) + (Number.isInteger(n.ytInicio) && n.ytInicio > 0 ? `&t=${n.ytInicio}s` : '') : BASE + n.url;
     const el = h(link ? 'a' : 'div', { class: 'gr-nade' + (n.grupo ? ' grupo' : ''), href: link, target: link && n.grupo ? '_blank' : null, rel: link ? 'noopener noreferrer' : null, estilo: `--k:${TIPOS[n.tipo].cor}`,
       title: n.grupo ? `Lineup da Geladeira${n.quem ? ' (' + n.quem + ')' : ''}` : `Ver o lineup (${n.alvo} from ${n.de})` },
       topoCartao(n, [n.top && h('span', { class: 'gr-top', title: 'Está no ranking Top do csnades.gg' }, '★ popular'), n.grupo && h('span', { class: 'gr-top gr-grupo' }, '❄ Geladeira')]),
