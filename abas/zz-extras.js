@@ -115,7 +115,7 @@
   function ir(id) { location.hash = '#' + id + '?' + paramsTexto(); }
   function sairTv() {
     if (!tv) return;
-    clearInterval(tv.relogio); document.removeEventListener('click', tv.clique, true); document.removeEventListener('keydown', tv.tecla, true);
+    cancelAnimationFrame(tv.raf); document.removeEventListener('click', tv.clique, true); document.removeEventListener('keydown', tv.tecla, true);
     document.removeEventListener('fullscreenchange', tv.fs);
     tv.barra.remove(); document.documentElement.classList.remove('z-tv');
     const dentro = document.fullscreenElement; tv = null;
@@ -138,12 +138,20 @@
     const el = document.documentElement;
     if (el.requestFullscreen) el.requestFullscreen().then(() => { est.pediuTela = true; }, () => { avisar('Tela cheia recusada; o modo TV segue na janela. Esc ou um clique sai.'); });
     else avisar('Tela cheia indisponível; o modo TV segue na janela. Esc ou um clique sai.');
-    est.relogio = setInterval(() => {
-      const f = Math.min(1, (performance.now() - est.ini) / INTERVALO);
+    // Rolagem: um quadro por frame, linear, do topo ao fim da aba dentro dos 20 s (1,5 s parado no topo e 2,5 s no fim).
+    // Aba que cabe na tela fica parada; com prefers-reduced-motion não rola (mostra o topo). A altura é medida a cada quadro.
+    const ATRASO_TOPO = 1500, ATRASO_FIM = 2500, se = document.scrollingElement || document.documentElement;
+    const quadro = (agora) => {
+      if (tv !== est) return;
+      const f = Math.min(1, (agora - est.ini) / INTERVALO);
       barraEl.firstChild.style.width = (f * 100) + '%';
-      if (!reduzMov()) { const alt = document.documentElement.scrollHeight - innerHeight; if (alt > 8) window.scrollTo(0, alt * f * 0.92); }
-      if (f >= 1) { est.ini = performance.now(); est.pos = (est.pos + 1) % lista.length; ir(lista[est.pos].id); }
-    }, 250);
+      const alt = Math.max(0, se.scrollHeight - se.clientHeight);
+      if (reduzMov() || alt < 8) { if (se.scrollTop !== 0) se.scrollTop = 0; }
+      else { const p = Math.min(1, Math.max(0, (agora - est.ini - ATRASO_TOPO) / (INTERVALO - ATRASO_TOPO - ATRASO_FIM))); se.scrollTop = Math.min(alt, alt * p); }
+      if (f >= 1) { est.ini = agora; est.pos = (est.pos + 1) % lista.length; se.scrollTop = 0; ir(lista[est.pos].id); }
+      est.raf = requestAnimationFrame(quadro);
+    };
+    est.ini = performance.now(); est.raf = requestAnimationFrame(quadro);
   }
   const btn = h('button', { type: 'button', id: 'btn-tv', class: 'btn', title: 'Modo TV: tela cheia, passa as abas a cada 20 segundos (Esc ou um clique sai)', onclick: () => { if (tv) sairTv(); else ligarTv(); } }, 'Modo TV');
   const acoes = $('.topo-acoes');

@@ -98,16 +98,50 @@
   const seletor = (atual) => h('nav', { class: 'sel-membros', 'aria-label': 'Escolher membro' },
     ...G.membros.map((m) => h('a', { href: linkAnalise(m.nick), class: 'chip-m' + (m.nick === atual ? ' ativo' : ''), 'aria-current': m.nick === atual ? 'page' : null, title: m.nick }, avatar(m.nick, 20), h('span', { class: 'chip-m-nome' }, rotuloMembro(m.nick)))));
 
+  // Resumo visual: base da amostra, 5 números contra o nível (barra do membro x barra do nível), placar de fortes x fracos e os destaques.
+  const KPIS = [
+    { rot: 'K/D', campo: 'kd', d: 2, cor: 'var(--c1)' },
+    { rot: 'ADR', campo: 'adr', d: 1, cor: 'var(--c2)' },
+    { rot: 'HS%', campo: 'hsPct', d: 1, u: '%', cor: 'var(--c3)' },
+    { rot: 'KAST', campo: 'kastPct', d: 1, u: '%', cor: 'var(--c6)' },
+    { rot: 'Rating aprox.', campo: 'rating', d: 2, cor: 'var(--c4)' },
+  ];
+  const kpi = (k, J, N) => {
+    const v = J[k.campo], ref = N[k.campo];
+    const temRef = Number.isFinite(v) && Number.isFinite(ref) && ref > 0;
+    const dif = temRef ? (v - ref) / ref : null;
+    const tipo = dif === null ? 'neutro' : Math.abs(dif) < 0.02 ? 'neutro' : dif > 0 ? 'ok' : 'bad';
+    const topo = temRef ? Math.max(v, ref) * 1.12 : 1;
+    const larg = (x) => `width:${Math.max(3, Math.min(100, (x / topo) * 100)).toFixed(1)}%`;
+    return h('div', { class: 'rs-kpi', estilo: `--k:${k.cor}` },
+      h('div', { class: 'rs-kpi-topo' }, h('span', { class: 'rot' }, k.rot),
+        dif !== null && h('span', { class: 'rs-dif ' + tipo }, tipo === 'neutro' ? 'na média' : `${dif > 0 ? '▲' : '▼'} ${Math.round(Math.abs(dif) * 100)}%`)),
+      h('b', { class: 'rs-kpi-v' }, val(v, k.d, k.u)),
+      temRef && h('div', { class: 'rs-cmp' },
+        h('div', null, h('span', null, 'membro'), h('span', { class: 'rs-trilho' }, h('i', { class: 'eu', estilo: larg(v) }))),
+        h('div', null, h('span', null, 'nível'), h('span', { class: 'rs-trilho' }, h('i', { class: 'ref', estilo: larg(ref) }))),
+        h('span', null, `média do nível: ${val(ref, k.d, k.u)}`)));
+  };
   const resumo = (nick, d) => {
     const J = d.perfil.m6.jogador, N = d.perfil.m6.nivel || {}, f = d.funcoes && d.funcoes.sugerida ? d.funcoes.ranking[0] : null;
     const maisForte = d.fortes[0], maisFraco = d.fracos[0];
-    return h('div', { class: 'resumo' },
-      h('p', null, `Nos ${janelaTexto()}, ${nick} tem `, h('b', null, pl(d.base.partidasJanela, 'partida', 'partidas')), ` na base, `, h('b', null, d.base.partidasAvancadas), ' com estatísticas avançadas da GC. ',
-        `K/D ${fmt(J.kd, 2)} (média do nível ${fmt(N.kd, 2)}), ADR ${fmt(J.adr, 1)} (${fmt(N.adr, 1)}), HS% ${fmt(J.hsPct, 1)} (${fmt(N.hsPct, 1)}), KAST ${fmt(J.kastPct, 1)}% (${fmt(N.kastPct, 1)}%) e rating aproximado ${fmt(J.rating, 2)} (${fmt(N.rating, 2)}).`),
-      h('p', null, `${pl(d.fortes.length, 'ponto forte', 'pontos fortes')} e ${pl(d.fracos.length, 'ponto fraco', 'pontos fracos')} contra a média do nível, só com amostra suficiente. `,
-        maisForte && [h('b', { class: 'ok' }, 'Maior destaque: '), `${maisForte.rotulo} (${difTexto(maisForte.diferencaRelativa)} que o nível). `],
-        maisFraco && [h('b', { class: 'bad' }, 'Maior ponto de atenção: '), `${maisFraco.rotulo} (${difTexto(maisFraco.diferencaRelativa)} que o nível). `],
-        f && `Função mais provável: ${f.nome}${d.funcoes.amostraPequena ? ' (amostra pequena)' : ''}.`));
+    const nf = d.fortes.length, nr = d.fracos.length, tot = nf + nr;
+    const dest = (tipo, rot, titulo, texto) => h('div', { class: 'rs-dest ' + tipo }, h('span', { class: 'rot' }, rot), h('b', null, titulo), texto && h('small', null, texto));
+    return h('div', { class: 'rs' },
+      h('div', { class: 'rs-base' },
+        h('span', { class: 'pilula', estilo: '--p:var(--c1)' }, h('b', null, d.base.partidasJanela), d.base.partidasJanela === 1 ? 'partida na base' : 'partidas na base'),
+        h('span', { class: 'pilula', estilo: '--p:var(--c2)' }, h('b', null, d.base.partidasAvancadas), 'com GC avançada'),
+        h('span', { class: 'pilula', estilo: '--p:var(--c6)' }, janelaTexto())),
+      h('div', { class: 'rs-kpis' }, ...KPIS.map((k) => kpi(k, J, N))),
+      h('div', { class: 'rs-placar', 'aria-label': `${pl(nf, 'ponto forte', 'pontos fortes')} e ${pl(nr, 'ponto fraco', 'pontos fracos')}` },
+        h('span', { class: 'ok' }, h('b', null, nf), nf === 1 ? 'ponto forte' : 'pontos fortes'),
+        tot > 0 && h('span', { class: 'rs-balanca', 'aria-hidden': 'true' }, h('i', { estilo: `width:${(nf / tot) * 100}%` }), h('i', { estilo: `width:${(nr / tot) * 100}%` })),
+        h('span', { class: 'bad' }, h('b', null, nr), nr === 1 ? 'ponto fraco' : 'pontos fracos'),
+        infoIcone('Contra a média de quem jogou no mesmo nível nas mesmas partidas; só entram números com amostra suficiente.')),
+      h('div', { class: 'rs-destaques' },
+        maisForte && dest('forte', 'Maior destaque', maisForte.rotulo, `${difTexto(maisForte.diferencaRelativa)} que o nível · ${val(maisForte.valor, maisForte.decimais, maisForte.unidade)} contra ${val(maisForte.referencia, maisForte.decimais, maisForte.unidade)}`),
+        maisFraco && dest('fraco', 'Maior ponto de atenção', maisFraco.rotulo, `${difTexto(maisFraco.diferencaRelativa)} que o nível · ${val(maisFraco.valor, maisFraco.decimais, maisFraco.unidade)} contra ${val(maisFraco.referencia, maisFraco.decimais, maisFraco.unidade)}`),
+        f && dest('funcao', 'Função mais provável', f.nome, `nota ${f.nota} de 100${d.funcoes.amostraPequena ? ' · amostra pequena' : ''}`)));
   };
 
   const itemPonto = (x, tipo) => h('li', { class: 'ponto-item ' + tipo },

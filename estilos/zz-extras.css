@@ -15,7 +15,10 @@
 
 /* modo TV */
 html.z-tv, html.z-tv * { cursor: none !important; }
-html.z-tv body { zoom: 1.25; }
+/* letras maiores sem zoom (zoom criava scroll horizontal e confundia a medida da rolagem) */
+html.z-tv { scroll-behavior: auto !important; overflow-x: hidden; }
+html.z-tv body { font-size: 18.75px; }
+html.z-tv main { padding-bottom: 28px; }
 html.z-tv #filtros, html.z-tv .busca, html.z-tv .rodape, html.z-tv #btn-link, html.z-tv #btn-tema, html.z-tv .rot-ano { display: none !important; }
 html.z-tv .grande { font-size: 3.4rem; }
 .z-tv-barra { position: fixed; left: 0; right: 0; bottom: 0; height: 6px; background: var(--grade); z-index: 50; }

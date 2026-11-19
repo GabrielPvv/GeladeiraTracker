@@ -115,7 +115,26 @@
   } });
 
   GT.registrarBloco({ aba: 'visao', id: 'origem', ordem: 80, render(el, ctx) {
-    const I = ctx.info;
-    el.append(card('De onde vêm os números', null, h('p', { class: 'nota' }, `A base tem ${I.totalBase} partidas de ${E.ano}; ${I.geladeira} são da Geladeira (2 ou mais membros no mesmo time)${I.mistas ? `, ${I.mistas} delas com membros nos dois times` : ''}. Cobertura: `, h('b', null, coberturaTexto()), '. Partidas sem nenhum dos arquivos desses membros não aparecem, então os números dos demais são parciais. K/D, ADR, HS% e KAST do grupo somam os membros em campo e dividem no fim; taxas nunca são média de médias. Partidas com jogadores da lista de excluídos do projeto ficam fora de tudo.')));
+    const I = ctx.info, cob = ctx.G.cobertura || { arquivosDe: [], outros: [] };
+    const fora = Math.max(0, I.totalBase - I.geladeira), mistas = I.mistas || 0, juntas = I.geladeira - mistas;
+    const num = (cor, valor, texto) => h('div', { class: 'or-num', estilo: `--k:${cor}` }, h('b', null, valor), h('small', null, texto));
+    const fatia = (n, cor, rot) => (n > 0 ? dica(h('i', { estilo: `width:${(n / I.totalBase) * 100}%;background:${cor}` }), () => `${rot}: ${pl(n, 'partida', 'partidas')}`) : null);
+    const regra = (cor, ico, forte, texto) => h('li', null, h('span', { class: 'or-ico', estilo: `--k:${cor}`, 'aria-hidden': 'true' }, ico), h('span', null, h('b', null, forte), ' ', texto));
+    const membros = (nicks) => h('div', { class: 'chips-m' }, ...nicks.map((n) => GT.u.chipMembro(n, { link: true, avatar: true })));
+    el.append(card('De onde vêm os números', null,
+      h('div', { class: 'or-nums' },
+        num('var(--c1)', I.totalBase, `partidas na base de ${E.ano}`),
+        num('var(--c6)', I.geladeira, 'da Geladeira (2+ membros no mesmo time)'),
+        mistas ? num('var(--c4)', mistas, 'com membros nos dois times') : null,
+        num('var(--c2)', fora, 'sem a Geladeira (não entram)')),
+      h('div', { class: 'or-proporcao', role: 'img', 'aria-label': `${I.geladeira} de ${I.totalBase} partidas são da Geladeira` },
+        fatia(juntas, 'var(--c6)', 'Geladeira'), fatia(mistas, 'var(--c4)', 'Membros nos dois times'), fatia(fora, 'var(--grade)', 'Sem a Geladeira')),
+      h('div', { class: 'or-cob' },
+        h('div', { class: 'or-grupo cheio' }, h('h3', null, '● Dados completos'), h('p', null, 'Mandaram os arquivos: todas as partidas deles entram.'), membros(cob.arquivosDe)),
+        cob.outros.length ? h('div', { class: 'or-grupo parcial' }, h('h3', null, '◐ Dados parciais'), h('p', null, 'Só aparecem nas partidas jogadas com quem mandou arquivo.'), membros(cob.outros)) : null),
+      h('ul', { class: 'or-regras' },
+        regra('var(--c1)', 'Σ', 'Números do grupo somam os membros em campo', 'e dividem no fim (K/D, ADR, HS% e KAST); taxa nunca é média de médias.'),
+        regra('var(--c4)', '⇄', 'Membros nos dois times', 'são partidas da Geladeira, mas ficam fora do win rate do grupo.'),
+        regra('var(--c3)', '⊘', 'Jogadores da lista de excluídos', 'tiram a partida inteira de todos os números.'))));
   } });
 })();

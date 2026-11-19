@@ -1,17 +1,23 @@
 /* Geladeira Tracker: base comum (tokens, tema, cabeçalho, cards, tabelas, gráficos, chips, avatar). Tema escuro por padrão; claro por prefers-color-scheme ou pelo botão. */
 :root {
-  --bg: #0d1015; --card: #161a21; --card2: #1d222b; --borda: #272d38; --fg: #e9edf2; --mudo: #93a0b1;
+  --bg: #0a0e16; --card: #141a24; --card2: #1b2330; --borda: #263044; --fg: #eef2f7; --mudo: #98a6ba;
+  --c1: #5aa9ff; --c2: #a78bfa; --c3: #f472b6; --c4: #fb923c; --c5: #facc15; --c6: #2dd4bf;
+  --fundo-brilho: .20; --fundo-ponto: rgba(255,255,255,.035);
   --ok: #3ecf8e; --bad: #ef5b5b; --acento: #7cc8ff; --aviso: #f0b429; --grade: #2a303b; --ref: #8d99ab; --sombra: 0 8px 24px rgba(0,0,0,.45);
   --raio: 12px; --fonte: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color-scheme: dark;
 }
 @media (prefers-color-scheme: light) {
   :root:not([data-tema="escuro"]) {
-    --bg: #f2f4f8; --card: #ffffff; --card2: #f4f6fa; --borda: #dce1ea; --fg: #141a22; --mudo: #5a6676;
+    --bg: #eef2f9; --card: #ffffff; --card2: #f3f6fb; --borda: #d9e0ec; --fg: #121826; --mudo: #566275;
+    --c1: #1d6fd6; --c2: #7c3aed; --c3: #c0266d; --c4: #c2410c; --c5: #a16207; --c6: #0f766e;
+    --fundo-brilho: .14; --fundo-ponto: rgba(20,40,80,.05);
     --ok: #12945d; --bad: #d23a3a; --acento: #0a67b5; --aviso: #a86b00; --grade: #e3e7ee; --ref: #7a8697; --sombra: 0 8px 24px rgba(20,30,50,.15); color-scheme: light;
   }
 }
 :root[data-tema="claro"] {
-  --bg: #f2f4f8; --card: #ffffff; --card2: #f4f6fa; --borda: #dce1ea; --fg: #141a22; --mudo: #5a6676;
+  --bg: #eef2f9; --card: #ffffff; --card2: #f3f6fb; --borda: #d9e0ec; --fg: #121826; --mudo: #566275;
+  --c1: #1d6fd6; --c2: #7c3aed; --c3: #c0266d; --c4: #c2410c; --c5: #a16207; --c6: #0f766e;
+  --fundo-brilho: .14; --fundo-ponto: rgba(20,40,80,.05);
   --ok: #12945d; --bad: #d23a3a; --acento: #0a67b5; --aviso: #a86b00; --grade: #e3e7ee; --ref: #7a8697; --sombra: 0 8px 24px rgba(20,30,50,.15); color-scheme: light;
 }
 * { box-sizing: border-box; }
@@ -196,3 +202,21 @@ details summary { cursor: pointer; color: var(--mudo); }
 .chip-m { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px 2px 3px; }
 .chip-m-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .spark { display: block; max-width: 100%; }
+/* ---- filtro de mapas (seleção múltipla) ---- */
+.multi { display: flex; gap: 6px; align-items: center; }
+.multi-caixa { position: relative; }
+.multi-btn { display: inline-flex; align-items: center; gap: 6px; max-width: 220px; }
+.multi-btn .multi-seta { color: var(--mudo); font-size: .8em; }
+.multi-lista { position: absolute; z-index: 45; top: calc(100% + 6px); left: 0; min-width: 210px; max-height: 60vh; overflow: auto; background: var(--card); border: 1px solid var(--borda); border-radius: 10px; box-shadow: var(--sombra); padding: 6px; display: grid; gap: 2px; }
+.multi-folha-topo { display: none; }
+.multi-op { display: flex; gap: 10px; align-items: center; padding: 7px 10px; border-radius: 8px; cursor: pointer; color: var(--fg); font-size: .9rem; }
+.multi-op:hover { background: var(--card2); }
+.multi-op input { width: 18px; height: 18px; accent-color: var(--acento); }
+.multi-fundo { display: none; }
+@media (max-width: 560px) {
+  .multi-fundo { display: block; position: fixed; inset: 0; z-index: 44; background: rgba(0, 0, 0, .5); }
+  .multi-lista { position: fixed; z-index: 45; left: 0; right: 0; top: auto; bottom: 0; max-height: 70vh; border-radius: 16px 16px 0 0; padding: 8px 10px 20px; }
+  .multi-folha-topo { display: flex; justify-content: space-between; align-items: center; padding: 6px 6px 10px; position: sticky; top: 0; background: var(--card); }
+  .multi-op { padding: 13px 10px; font-size: 1rem; }
+  .multi-op input { width: 22px; height: 22px; }
+}

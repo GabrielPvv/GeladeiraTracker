@@ -64,9 +64,9 @@
       h('div', { class: 'premio-valor' }, valor), h('small', { class: 'mudo' }, detalhe)));
 
   GT.registrarBloco({ aba: 'visao', id: 'semana', ordem: 17, render(el, ctx) {
-    const S = destaqueSemana(ctx.D.partidas.filter((m) => !E.mapa || m.mp === E.mapa));
+    const S = destaqueSemana(ctx.D.partidas.filter((m) => E.mapas.length === 0 || E.mapas.includes(m.mp)));
     const quando = S ? `${dataCurta(S.ini)} a ${dataBR(S.fim)}` : '';
-    const nota = S ? `Os 7 dias até a partida mais recente (${quando}), ${pl(S.partidas, 'partida', 'partidas')}${E.mapa ? ` em ${E.mapa}` : ''}. Segue o mapa escolhido e ignora o período.` : null;
+    const nota = S ? `Os 7 dias até a partida mais recente (${quando}), ${pl(S.partidas, 'partida', 'partidas')}${E.mapas.length ? ` em ${E.mapas.join(' + ')}` : ''}. Segue o mapa escolhido e ignora o período.` : null;
     const prem = S ? [
       S.adr && premio('🎯', 'Maior ADR', S.adr, n1(S.adr.adr), `dano por rodada em ${pl(S.adr.partidas, 'partida', 'partidas')}`),
       S.kd && premio('⚔️', 'Melhor K/D', S.kd, n2(S.kd.kd), `${S.kd.k} abates e ${S.kd.m} mortes em ${pl(S.kd.partidas, 'partida', 'partidas')}`),

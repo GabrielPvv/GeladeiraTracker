@@ -76,9 +76,12 @@
 
   // ---------- estado e filtros ----------
   // E: estado global (ano, período, mapa, aba atual). UI: estado local das abas (cada aba usa os seus campos).
-  const E = { per: 'ano', n: 20, mapa: '', ano: G && G.anos ? G.anos[G.anos.length - 1] : '', aba: 'visao', membro: null, destaqueAdv: null };
+  const E = { per: 'ano', n: 20, mapas: [], ano: G && G.anos ? G.anos[G.anos.length - 1] : '', aba: 'visao', membro: null, destaqueAdv: null };
   const UI = { sort: 'partidas', dir: -1 };
   const lista_ = (s) => (s ? s.split(',').map((x) => x.trim()).filter(Boolean) : []);
+  // E.mapas: lista de mapas escolhidos (vazia = todos). E.mapa (texto "a + b") existe só para exibir; atribuir uma string aceita "a,b" (formato antigo: um mapa).
+  Object.defineProperty(E, 'mapa', { get: () => E.mapas.join(' + '), set: (v) => { E.mapas = lista_(String(v || '')); }, enumerable: false });
+  const passaMapa = (mp) => !E.mapas.length || E.mapas.includes(mp); // para quem filtra partidas por conta própria
   const dados = () => G.porAno[E.ano];
   const membrosAno = () => dados().info.membros;
 
@@ -86,7 +89,7 @@
     if (p.get('ano') && G.anos.includes(p.get('ano'))) E.ano = p.get('ano');
     if (['ano', '6m', '30d', 'n'].includes(p.get('per'))) E.per = p.get('per');
     if (Number(p.get('n')) >= 1) E.n = Math.min(999, Math.floor(Number(p.get('n'))));
-    if (p.has('mapa')) E.mapa = p.get('mapa');
+    if (p.has('mapa')) E.mapas = lista_(p.get('mapa'));
     // "com" e "sem" de links antigos são ignorados (o filtro com/sem existe só no montador da aba Lines).
   }
   const paramsAtuais = () => {
@@ -94,7 +97,7 @@
     p.set('ano', E.ano);
     if (E.per !== 'ano') p.set('per', E.per);
     if (E.per === 'n') p.set('n', E.n);
-    if (E.mapa) p.set('mapa', E.mapa);
+    if (E.mapas.length) p.set('mapa', E.mapas.join(','));
     return p;
   };
   const paramsTexto = () => paramsAtuais().toString().replace(/%2C/g, ',');
@@ -103,12 +106,12 @@
     const [caminho, q = ''] = decodeURIComponent(location.hash.replace(/^#/, '')).split('?');
     aplicarParams(new URLSearchParams(q));
     const [rota, ...resto] = caminho.split('/');
-    const a = GT.abas.find((x) => x.id === rota || (x.apelidos || []).includes(rota)) || GT.abas.find((x) => x.id === 'visao') || GT.abas[0];
+    const a = GT.abas.find((x) => x.id === rota || (x.apelidos || []).includes(rota)) || GT.abas.find((x) => x.id === 'home') || GT.abas.find((x) => x.id === 'visao') || GT.abas[0];
     E.aba = a.id; if (a.id !== 'membro') E.membro = null;
     if (a.rotaLer) a.rotaLer(resto, E);
   }
   function gravarEstado() {
-    guardar('geladeira.filtros', JSON.stringify({ ano: E.ano, per: E.per, n: E.n, mapa: E.mapa }));
+    guardar('geladeira.filtros', JSON.stringify({ ano: E.ano, per: E.per, n: E.n, mapa: E.mapas.join(',') }));
     const a = abaAtual();
     try { history.replaceState(null, '', '#' + E.aba + (a && a.rotaEscrever ? a.rotaEscrever(E) : '') + '?' + paramsTexto()); } catch { /* file:// em alguns navegadores */ }
   }
@@ -119,7 +122,7 @@
   // Período e mapa. `todas` e `ms` são iguais (o filtro com/sem existe só no montador); `ms` é o que as abas usam.
   function filtrar() {
     const D = dados(); let ms = D.partidas;
-    if (E.mapa) ms = ms.filter((m) => m.mp === E.mapa);
+    if (E.mapas.length) ms = ms.filter((m) => E.mapas.includes(m.mp));
     if (E.per === '6m') { const c = menosMeses(D.info.ultima, 6); ms = ms.filter((m) => m.d >= c); }
     else if (E.per === '30d') { const c = somarDias(D.info.ultima, -30); ms = ms.filter((m) => m.d >= c); }
     const todas = E.per === 'n' ? ms.slice(-E.n) : ms;
@@ -127,10 +130,10 @@
   }
   function descFiltro() {
     const p = { ano: `em ${E.ano}`, '6m': `nos últimos 6 meses de ${E.ano}`, '30d': `nos últimos 30 dias de ${E.ano}`, n: E.n === 1 ? `na última partida de ${E.ano}` : `nas últimas ${E.n} partidas de ${E.ano}` }[E.per];
-    return [p, E.mapa && `em ${E.mapa}`].filter(Boolean).join(', ');
+    return [p, E.mapas.length && `em ${E.mapas.join(' + ')}`].filter(Boolean).join(', ');
   }
-  const filtrado = () => E.per !== 'ano' || !!E.mapa;
-  function limparFiltros() { Object.assign(E, { per: 'ano', mapa: '' }); render(); }
+  const filtrado = () => E.per !== 'ano' || E.mapas.length > 0;
+  function limparFiltros() { Object.assign(E, { per: 'ano', mapas: [] }); render(); }
   function coberturaTexto() {
     const c = G.cobertura || { arquivosDe: [], outros: [] };
     return `dados de ${lista(c.arquivosDe)}; ${c.outros.length ? `os outros membros (${lista(c.outros)}) só aparecem nas partidas ${c.arquivosDe.length === 3 ? 'desses três' : 'desses arquivos'}` : 'todos os membros mandaram arquivo'}`;
@@ -154,7 +157,7 @@
 
   // ---------- peças ----------
   const card = (titulo, nota, ...kids) => h('section', { class: 'card' }, titulo && h('h2', null, titulo), nota && h('p', { class: 'nota' }, nota), ...kids);
-  const vazioFiltro = (extra) => h('p', { class: 'vazio' }, 'Sem partidas nesse filtro. ', extra, ' ', h('button', { class: 'btn pequeno', type: 'button', onclick: limparFiltros }, 'Limpar filtros'));
+  const vazioFiltro = (extra) => h('p', { class: 'vazio' }, (E.mapas.length ? 'Nenhuma partida nesses mapas no período escolhido. ' : 'Sem partidas nesse filtro. '), extra, ' ', h('button', { class: 'btn pequeno', type: 'button', onclick: limparFiltros }, 'Limpar filtros'));
   const desenhos = [];
   // Área de gráfico: fn(el) roda depois que o elemento está na página (para medir a largura) e de novo a cada mudança de largura.
   const grafico = (fn, cl = 'grafico') => { const el = h('div', { class: cl }); desenhos.push(() => fn(el)); return el; };
@@ -342,7 +345,7 @@
   GT.registrarBloco = (b) => { GT.blocos = GT.blocos.filter((x) => !(x.aba === b.aba && x.id === b.id)).concat([{ ordem: 100, ...b }]); };
   GT.aoMudarAno = (f) => GT.ganchosAno.push(f); // f() roda quando o usuário troca o ano (limpar estado local da aba)
 
-  GT.u = { $, h, sv, pôr, MESES, MESES_LONGOS, mesNome, pct, n1, n2, dataBR, dataCurta, cls, pl, lista, guardar, ler, reduzMov, depois, nomeResultado, MIN_LINE, AMOSTRA,
+  GT.u = { passaMapa, $, h, sv, pôr, MESES, MESES_LONGOS, mesNome, pct, n1, n2, dataBR, dataCurta, cls, pl, lista, guardar, ler, reduzMov, depois, nomeResultado, MIN_LINE, AMOSTRA,
     dica, mostrarDica, esconderDica, infoIcone, avisar, E, UI, dados, membrosAno, filtrar, descFiltro, filtrado, limparFiltros, coberturaTexto, paramsTexto, gravarEstado,
     rotuloMembro, linkMembro, avatar, chipMembro, chipsMembros, card, vazioFiltro, grafico, anel, barra, miniBarra, sparkline, tabela, cWr, tabelaOrdenavel,
     ticks, barrasWr, linhas, rotulosMeses, grade, ranking, heroGrupo, render: () => render(), lista_, somarDias, menosMeses };
@@ -364,15 +367,30 @@
     }
     return nos;
   }
+
+  // Seleção múltipla de mapas: botão com resumo + lista de caixinhas ("Todos" no topo). No celular a lista abre como folha por baixo.
+  function resumoMapas() { const n = E.mapas.length; return n === 0 ? 'Todos' : n <= 2 ? E.mapas.join(' + ') : `${n} mapas`; }
+  function seletorMapas(mapas) {
+    const aberto = !!UI.mapasAberto;
+    const alternar = (nome) => { E.mapas = E.mapas.includes(nome) ? E.mapas.filter((x) => x !== nome) : [...E.mapas, nome].sort(); if (E.mapas.length === mapas.length) E.mapas = []; UI.mapasFoco = 'mapa:' + nome; render(); };
+    const caixa = (id, rotulo, marcado, onchange) => h('label', { class: 'multi-op' }, h('input', { type: 'checkbox', 'data-foco': id, checked: marcado, onchange }), h('span', null, rotulo));
+    const lista = h('div', { class: 'multi-lista', role: 'group', 'aria-label': 'Mapas' },
+      h('div', { class: 'multi-folha-topo' }, h('strong', null, 'Mapas'), h('button', { type: 'button', class: 'btn pequeno', onclick: () => { UI.mapasAberto = false; render(); } }, 'Fechar')),
+      caixa('todos', 'Todos', E.mapas.length === 0, () => { E.mapas = []; UI.mapasFoco = 'todos'; render(); }),
+      ...mapas.map((m) => caixa('mapa:' + m, m, E.mapas.includes(m), () => alternar(m))));
+    const btn = h('button', { type: 'button', class: 'btn multi-btn', 'aria-haspopup': 'true', 'aria-expanded': String(aberto), onclick: () => { UI.mapasAberto = !UI.mapasAberto; UI.mapasFoco = null; render(); } }, resumoMapas(), h('span', { class: 'multi-seta', 'aria-hidden': 'true' }, '▾'));
+    return h('div', { class: 'multi-caixa' }, btn, aberto && h('div', { class: 'multi-fundo', onclick: () => { UI.mapasAberto = false; render(); } }), aberto && lista);
+  }
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && UI.mapasAberto) { UI.mapasAberto = false; render(); } });
   function barraFiltros(F) {
     const box = $('#filtros'); box.replaceChildren(); box.hidden = false;
     const D = dados(), mapas = [...new Set(D.partidas.map((m) => m.mp))].sort();
-    if (E.mapa && !mapas.includes(E.mapa)) E.mapa = '';
+    E.mapas = E.mapas.filter((m) => mapas.includes(m));
     const opt = (v, t, atual) => h('option', { value: v, selected: v === atual }, t);
     box.append(...[
       h('label', null, 'Período', h('select', { onchange: (e) => { E.per = e.target.value; render(); } }, opt('ano', `Ano todo (${E.ano})`, E.per), opt('6m', 'Últimos 6 meses', E.per), opt('30d', 'Últimos 30 dias', E.per), opt('n', 'Últimas X partidas', E.per))),
       E.per === 'n' && h('label', null, 'X', h('input', { type: 'number', min: 1, max: 999, value: E.n, onchange: (e) => { E.n = Math.max(1, Math.floor(Number(e.target.value)) || 20); render(); } })),
-      h('label', null, 'Mapa', h('select', { onchange: (e) => { E.mapa = e.target.value; render(); } }, opt('', 'Todos', E.mapa), ...mapas.map((m) => opt(m, m, E.mapa)))),
+      h('div', { class: 'multi' }, h('span', { class: 'multi-rot' }, 'Mapa'), seletorMapas(mapas)),
       filtrado() && h('button', { class: 'btn pequeno', type: 'button', onclick: limparFiltros }, 'Limpar filtros'),
       h('span', { class: 'conta' }, `${F.ms.length} de ${pl(D.info.geladeira, 'partida', 'partidas')} da Geladeira`)].filter(Boolean));
   }
@@ -385,12 +403,15 @@
     const aba = abaAtual();
     for (const a of document.querySelectorAll('#abas a')) { const at = a.dataset.aba === E.aba || (E.aba === 'membro' && a.dataset.aba === 'membros'); if (at) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); a.href = '#' + a.dataset.aba + '?' + paramsTexto(); }
     barraFiltros(F);
+    if (UI.mapasAberto && UI.mapasFoco) { const f = [...document.querySelectorAll('.multi-lista input')].find((i) => i.getAttribute('data-foco') === UI.mapasFoco); if (f) f.focus(); }
     let conteudo;
     if (!dados().partidas.length) conteudo = [h('p', { class: 'vazio' }, `Sem partidas da Geladeira em ${E.ano}.`)];
     else if (!F.ms.length && !(aba && aba.aceitaVazio)) conteudo = [h('header', { class: 'cabeca' }, h('h1', null, 'Geladeira Tracker')), vazioFiltro()];
     else conteudo = montarAba(aba, criarCtx(F));
     painel.replaceChildren(...conteudo);
     desenhos.forEach((f) => f());
+    // Cada card ganha uma cor da paleta (--c1 a --c6), em sequência na página.
+    painel.querySelectorAll('.card').forEach((c, i) => c.style.setProperty('--cor', `var(--c${(i % 6) + 1})`));
     const I = dados().info, gerado = G.geradoEm ? `${dataBR(G.geradoEm.slice(0, 10))} ${G.geradoEm.slice(11)}` : '—';
     $('#rodape').textContent = `Geladeira Tracker · gerado em ${gerado} · base: ${pl(I.totalBase, 'partida', 'partidas')} de ${E.ano}, ${I.geladeira} da Geladeira (${F.ms.length} nesta visão) · ${coberturaTexto()}`;
     document.title = E.aba === 'membro' ? `${E.membro} · Geladeira Tracker` : 'Geladeira Tracker';
@@ -403,19 +424,31 @@
     $('#abas').replaceChildren(...GT.abas.filter((a) => !a.oculta).sort((x, y) => x.ordem - y.ordem).map((a) => h('a', { href: '#' + a.id, 'data-aba': a.id }, a.titulo)));
     const selAno = $('#sel-ano');
     selAno.replaceChildren(...[...G.anos].reverse().map((a) => h('option', { value: a }, a)));
-    selAno.addEventListener('change', () => { E.ano = selAno.value; E.mapa = ''; E.destaqueAdv = null; GT.ganchosAno.forEach((f) => f()); render(); });
+    selAno.addEventListener('change', () => { E.ano = selAno.value; E.mapas = []; E.destaqueAdv = null; GT.ganchosAno.forEach((f) => f()); render(); });
     $('#btn-link').addEventListener('click', () => {
       gravarEstado();
       const url = location.href;
       const fallback = () => { const t = h('textarea', { estilo: 'position:fixed;opacity:0' }, url); document.body.append(t); t.select(); let ok = false; try { ok = document.execCommand('copy'); } catch { /* sem cópia */ } t.remove(); avisar(ok ? 'Link copiado' : 'Não foi possível copiar; copie da barra de endereço'); };
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(() => avisar('Link copiado'), fallback); else fallback();
     });
-    const aplicarTema = (t) => { if (t) document.documentElement.setAttribute('data-tema', t); else document.documentElement.removeAttribute('data-tema'); };
+    // Botão de tema com texto: mostra para qual tema ele leva ("Modo claro" quando o site está escuro e vice-versa).
+    const temaAtual = () => document.documentElement.getAttribute('data-tema') || (matchMedia('(prefers-color-scheme: light)').matches ? 'claro' : 'escuro');
+    const btnTema = $('#btn-tema');
+    const rotularTema = () => {
+      const claro = temaAtual() === 'claro';
+      btnTema.replaceChildren(h('span', { class: 'tema-ico', 'aria-hidden': 'true' }, claro ? '☾' : '☀'), h('span', { class: 'tema-txt' }, claro ? 'Modo escuro' : 'Modo claro'));
+      btnTema.setAttribute('aria-label', claro ? 'Mudar para o modo escuro' : 'Mudar para o modo claro');
+      btnTema.title = btnTema.getAttribute('aria-label');
+    };
+    const aplicarTema = (t) => { if (t) document.documentElement.setAttribute('data-tema', t); else document.documentElement.removeAttribute('data-tema'); rotularTema(); };
     aplicarTema(ler('geladeira.tema'));
-    $('#btn-tema').addEventListener('click', () => {
-      const atual = document.documentElement.getAttribute('data-tema') || (matchMedia('(prefers-color-scheme: light)').matches ? 'claro' : 'escuro');
-      const novo = atual === 'claro' ? 'escuro' : 'claro'; aplicarTema(novo); guardar('geladeira.tema', novo);
-    });
+    btnTema.classList.add('btn-tema');
+    btnTema.addEventListener('click', () => { const novo = temaAtual() === 'claro' ? 'escuro' : 'claro'; aplicarTema(novo); guardar('geladeira.tema', novo); });
+    matchMedia('(prefers-color-scheme: light)').addEventListener('change', rotularTema);
+    // Voltar ao topo: aparece depois de rolar uma tela.
+    const voltar = h('button', { type: 'button', class: 'voltar-topo', 'aria-label': 'Voltar ao topo', title: 'Voltar ao topo', onclick: () => window.scrollTo({ top: 0, behavior: reduzMov() ? 'auto' : 'smooth' }) }, '↑');
+    document.body.append(voltar);
+    window.addEventListener('scroll', () => voltar.classList.toggle('ver', window.scrollY > window.innerHeight * 0.8), { passive: true });
     // Busca de membro ou adversário (com apelidos de tracker\grupo.json).
     const busca = $('#busca'), res = $('#busca-res');
     const semAcento = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();

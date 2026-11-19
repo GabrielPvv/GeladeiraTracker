@@ -8,10 +8,10 @@
 
   // Soma linhas { v, dd, k, m, a, dano, rod, hs, kast, fk, rt } e calcula as taxas no fim.
   function somar(linhas) {
-    const s = { partidas: 0, v: 0, d: 0, k: 0, mortes: 0, a: 0, dano: 0, rod: 0, hs: 0, kast: 0, fk: 0 };
+    const s = { partidas: 0, v: 0, d: 0, k: 0, mortes: 0, a: 0, dano: 0, rod: 0, hs: 0, kast: 0, fk: 0, mk: 0 };
     let rt = 0, nrt = 0;
-    for (const j of linhas) { s.partidas++; s.v += j.v; s.d += j.dd; s.k += j.k; s.mortes += j.m; s.a += j.a; s.dano += j.dano; s.rod += j.rod; s.hs += j.hs; s.kast += j.kast; s.fk += j.fk; if (j.rt) { rt += j.rt; nrt++; } }
-    return { ...s, wr: r(s.v / Math.max(1, s.v + s.d), 4), kd: r(s.k / Math.max(1, s.mortes)), adr: r(s.dano / Math.max(1, s.rod), 1), hsPct: r(s.hs / Math.max(1, s.k), 4), kastPct: r(s.kast / Math.max(1, s.rod), 4), fkRod: r(s.fk / Math.max(1, s.rod), 3), rating: nrt ? Math.round(rt / nrt) : null };
+    for (const j of linhas) { s.partidas++; s.v += j.v; s.d += j.dd; s.k += j.k; s.mortes += j.m; s.a += j.a; s.dano += j.dano; s.rod += j.rod; s.hs += j.hs; s.kast += j.kast; s.fk += j.fk; s.mk += j.mk || 0; if (j.rt) { rt += j.rt; nrt++; } }
+    return { ...s, wr: r(s.v / Math.max(1, s.v + s.d), 4), kd: r(s.k / Math.max(1, s.mortes)), adr: r(s.dano / Math.max(1, s.rod), 1), hsPct: r(s.hs / Math.max(1, s.k), 4), kastPct: r(s.kast / Math.max(1, s.rod), 4), fkRod: r(s.fk / Math.max(1, s.rod), 3), mkRod: r(s.mk / Math.max(1, s.rod), 3), rating: nrt ? Math.round(rt / nrt) : null };
   }
   const linhaMembro = (x) => ({ ...x, v: x.r === 'V' ? 1 : 0, dd: x.r === 'D' ? 1 : 0 }); // resultado do time do próprio membro
 
