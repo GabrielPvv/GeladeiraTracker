@@ -455,7 +455,7 @@
     function buscar(q) {
       q = semAcento(q.trim()); if (!q) return [];
       const D = dados(), ap = G.apelidos || {}, out = new Map();
-      const alvos = [...membrosAno().map((nick) => ({ nick, tipo: 'membro' })), ...D.adversarios.map((a) => ({ nick: a.jogador, tipo: 'adversário' }))];
+      const alvos = [...membrosAno().map((nick) => ({ nick, tipo: 'membro' })), ...(G.fichas || D.adversarios.map((a) => ({ nick: a.jogador }))).map((a) => ({ nick: a.nick, tipo: 'adversário' }))];
       for (const t of alvos) {
         if (out.has(t.nick)) continue;
         const via = Object.entries(ap).find(([k, v]) => v === t.nick && semAcento(k).includes(q));
@@ -466,6 +466,7 @@
     function irPara(r) {
       res.hidden = true; busca.value = '';
       if (r.tipo === 'membro') location.hash = '#membro/' + encodeURIComponent(r.nick) + '?' + paramsTexto();
+      else if (GT.abrirFicha) GT.abrirFicha(r.nick);
       else { E.destaqueAdv = r.nick; location.hash = '#adversarios?' + paramsTexto(); render(); }
     }
     busca.addEventListener('input', () => {
