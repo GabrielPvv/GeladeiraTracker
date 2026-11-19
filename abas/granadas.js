@@ -33,7 +33,9 @@
   function fecharJanela() { if (!janela) return; janela.remove(); janela = null; document.documentElement.classList.remove('gr-modal-aberto'); if (voltarFoco) voltarFoco.focus(); }
   function abrirJanela(n) {
     fecharJanela(); voltarFoco = document.activeElement;
-    const titulo = `${n.alvo} · de ${n.de} (${TIPOS[n.tipo].rot})`, url = BASE + n.url, yt = idYT(n);
+    // Granada dos pros (n.pro): mesmo player; o link de apoio é a página dela no nades.ai em vez do csnades.gg.
+    const site = n.pro ? 'nades.ai' : 'csnades.gg';
+    const titulo = `${n.alvo} · de ${n.de} (${TIPOS[n.tipo].rot})`, url = (n.pro ? BASE_PROS : BASE) + n.url, yt = idYT(n);
     // Compilado: o vídeo começa no capítulo da granada.
     const ini = yt && Number.isInteger(n.ytInicio) && n.ytInicio > 0 ? n.ytInicio : 0;
     const mmss = `${Math.floor(ini / 60)}:${String(ini % 60).padStart(2, '0')}`;
@@ -48,7 +50,7 @@
         h('b', null, n.ytTitulo || titulo),
         ini ? h('small', { class: 'gr-yt-inicio' }, `▶ Começa em ${mmss}${n.ytCapitulo ? ` (capítulo "${n.ytCapitulo}" do vídeo)` : ' (capítulo do vídeo)'}`) : null,
         h('small', { class: 'mudo' }, `Vídeo de ${n.ytCanal || 'um canal'} no YouTube · `, h('a', { class: 'gr-yt-link', href: verYT, target: '_blank', rel: 'noopener noreferrer' }, `youtube.com/watch?v=${yt}${ini ? `&t=${ini}s` : ''}`)),
-        h('small', { class: 'mudo' }, 'Lineup listado pelo ', h('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }, 'csnades.gg'), '.'))
+        h('small', { class: 'mudo' }, n.pro ? 'Lineup do ranking dos pros no ' : 'Lineup listado pelo ', h('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }, site), '.'))
       : h('p', { class: 'nota gr-credito' }, 'Página e vídeo do csnades.gg. Se não carregar, use "Abrir no csnades.gg".');
     janela = h('div', { class: 'gr-modal', role: 'dialog', 'aria-modal': 'true', 'aria-label': titulo },
       h('div', { class: 'gr-modal-fundo', onclick: fecharJanela }),
@@ -56,7 +58,7 @@
         h('div', { class: 'gr-modal-topo' }, h('b', null, titulo),
           h('div', { class: 'gr-modal-acoes' },
             yt && h('a', { class: 'btn', href: verYT, target: '_blank', rel: 'noopener noreferrer' }, 'Abrir no YouTube ↗'),
-            h('a', { class: 'btn', href: url, target: '_blank', rel: 'noopener noreferrer' }, yt ? 'Ver no csnades.gg ↗' : 'Abrir no csnades.gg ↗'), fechar)),
+            h('a', { class: 'btn', href: url, target: '_blank', rel: 'noopener noreferrer' }, yt ? `Ver no ${site} ↗` : `Abrir no ${site} ↗`), fechar)),
         corpo, info));
     document.body.append(janela); document.documentElement.classList.add('gr-modal-aberto');
     fechar.focus();
@@ -90,12 +92,19 @@
     if (!n.grupo) el.addEventListener('click', (e) => { if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return; e.preventDefault(); abrirJanela(n); });
     return el;
   };
-  // Cartão dos pros (nades.ai, nova aba: o site deles não pode ser conferido para abrir em janela).
-  const cartaoPro = (n) => h('a', { class: 'gr-nade pro', href: BASE_PROS + n.url, target: '_blank', rel: 'noopener noreferrer', estilo: `--k:${TIPOS[n.tipo].cor}`, title: `Abrir no nades.ai (${n.alvo} from ${n.de})` },
-    topoCartao(n, [h('span', { class: 'gr-rank', title: `${n.rank}º no ranking dos pros no nades.ai` }, `#${n.rank}`)]),
-    h('b', { class: 'gr-alvo' }, n.alvo), h('small', { class: 'gr-de' }, `de ${n.de}`),
-    n.det && h('p', null, `Arremesso: ${n.det}`),
-    h('span', { class: 'gr-ver' }, 'Ver no nades.ai ↗'));
+  // Cartão dos pros. Com vídeo do YouTube (yt): o clique abre a mesma janela das essenciais e o vídeo toca aqui (Ctrl+clique abre
+  // o YouTube em nova aba). Sem yt: abre a página da granada no nades.ai em nova aba (o vídeo deles fica lá; o site barra a janela).
+  const cartaoPro = (n) => {
+    const yt = idYT(n), ini = Number.isInteger(n.ytInicio) && n.ytInicio > 0 ? n.ytInicio : 0;
+    const el = h('a', { class: 'gr-nade pro', href: yt ? YT_VER + yt + (ini ? `&t=${ini}s` : '') : BASE_PROS + n.url, target: yt ? null : '_blank', rel: 'noopener noreferrer', estilo: `--k:${TIPOS[n.tipo].cor}`,
+      title: yt ? `Ver o vídeo do lineup (${n.alvo} from ${n.de})` : `Abrir no nades.ai (${n.alvo} from ${n.de})` },
+      topoCartao(n, [h('span', { class: 'gr-rank', title: `${n.rank}º no ranking dos pros no nades.ai` }, `#${n.rank}`)]),
+      h('b', { class: 'gr-alvo' }, n.alvo), h('small', { class: 'gr-de' }, `de ${n.de}`),
+      n.det && h('p', null, `Arremesso: ${n.det}`),
+      h('span', { class: 'gr-ver' }, yt ? '▶ Ver vídeo aqui' : 'Vídeo no nades.ai ↗'));
+    if (yt) el.addEventListener('click', (e) => { if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return; e.preventDefault(); abrirJanela({ ...n, pro: true }); });
+    return el;
+  };
 
   GT.registrarBloco({ aba: 'granadas', id: 'lista', ordem: 10, render(el, ctx) {
     const D = DADOS(), slugs = Object.keys(D);
@@ -147,7 +156,7 @@
         corpo = colunas.length ? h('div', { class: 'gr-areas' }, ...colunas.map((c) => h('section', { class: 'gr-area' }, h('h3', null, TIPOS[c.t].plural, h('small', null, ` · ${c.l.length}`)), h('div', { class: 'gr-lista' }, ...c.l.map(cartaoPro)))))
           : h('p', { class: 'vazio' }, 'Nenhuma granada com esse filtro.');
       }
-      nota = 'Ranking "Best" do nades.ai em cada tipo, montado a partir de partidas profissionais (o número # é a posição nesse ranking). Lista lida em 19/11/2026; para a contagem de jogadas e o vídeo, abra no nades.ai.';
+      nota = 'Ranking "Best" do nades.ai em cada tipo, montado a partir de partidas profissionais (o número # é a posição nesse ranking; lista lida em 19/11/2026). "▶ Ver vídeo aqui": um vídeo do YouTube do mesmo lineup toca aqui, na janela, com título e canal embaixo. As demais abrem a página da granada no nades.ai, onde fica o vídeo deles.';
     } else {
       const lista = [...doGrupo(UI.granMapa), ...mapa.granadas].filter(passa);
       corpo = lista.length
