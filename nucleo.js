@@ -140,7 +140,7 @@
   }
 
   // ---------- membros: apelido, avatar, chips, links ----------
-  const rotuloMembro = (n) => { const m = (G.membros || []).find((x) => x.nick === n); return (m && m.apelidos && m.apelidos[0]) || n; };
+  const rotuloMembro = (n) => n; // o site mostra sempre o nick da GC (os apelidos de grupo.json só servem para a busca)
   const linkMembro = (n) => '#membro/' + encodeURIComponent(n) + '?' + paramsTexto();
   const hashNick = (s) => { let x = 2166136261; for (const c of String(s)) { x ^= c.charCodeAt(0); x = Math.imul(x, 16777619) >>> 0; } return x; };
   const iniciais = (nome) => { const p = String(nome).split(/[\s_\-.]+/).filter(Boolean); return (p.length > 1 ? p[0][0] + p[1][0] : String(nome).replace(/[^A-Za-z0-9]/g, '').slice(0, 2)).toUpperCase() || '?'; };

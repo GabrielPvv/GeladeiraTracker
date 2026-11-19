@@ -174,7 +174,7 @@
       });
       return h('div', { class: 'mm home-in', estilo: `--d:${i * 30}ms` }, h('span', { class: 'rot' }, c.t, c.av ? h('span', { class: 'selo' }, '6 meses') : null), ...linhas);
     });
-    el.append(h('section', { class: 'card' }, h('h2', null, 'Categoria por categoria'), h('p', { class: 'nota' }, 'Uma barra por membro em cada categoria, do maior para o menor, para ver a distância entre eles.'), h('div', { class: 'mms' }, ...cards)));
+    el.append(h('section', { class: 'card' }, h('h2', null, 'Ranking por categoria'), h('p', { class: 'nota' }, 'Uma barra por membro em cada categoria, do maior para o menor, para ver a distância entre eles.'), h('div', { class: 'mms' }, ...cards)));
   } });
 
   // ---------- 4. forma recente ----------
@@ -216,7 +216,7 @@
       const notas = f ? Object.fromEntries(f.ranking.map((q) => [q.id, q.nota ?? 0])) : null;
       const sug = f && f.sugerida ? f.ranking.find((q) => q.id === f.sugerida) : null;
       const c = h('a', { class: 'perfil home-in', href: `#analise/${encodeURIComponent(nick)}?${paramsTexto()}`, estilo: `--d:${i * 45}ms` },
-        h('div', { class: 'perfil-topo' }, avatar(nick, 34), h('div', null, h('strong', null, rotuloMembro(nick)), h('small', null, nick))),
+        h('div', { class: 'perfil-topo' }, avatar(nick, 34), h('div', null, h('strong', null, nick))),
         notas ? radar(notas) : h('div', { class: 'perfil-sem' }, 'sem GC avançada'),
         h('div', { class: 'perfil-funcao' }, h('span', { class: 'rot' }, 'Função provável'), h('b', null, sug ? sug.nome : '—'), f && f.amostraPequena ? h('span', { class: 'selo' }, 'amostra pequena') : null));
       dica(c, () => (f ? `${rotuloMembro(nick)}: ${ORDEM_FUNCOES.map(([id, nome]) => `${nome} ${notas[id]}`).join(' · ')} (${pl(f.partidasAvancadas, 'partida avançada', 'partidas avançadas')}). Clique para abrir a Análise.` : `${semAdv} Clique para abrir a Análise.`));

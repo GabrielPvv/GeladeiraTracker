@@ -74,10 +74,9 @@
   };
   function cartaoJogador(nick, { titulo = 'h1' } = {}) {
     const d = dadosDe(nick);
-    const apel = (G.membros.find((m) => m.nick === nick) || {}).apelidos || [];
     const nome = h(titulo, { class: 'jc-nome' }, nick);
     const quem = h('div', { class: 'jc-quem' }, avatar(nick, 76), h('div', { class: 'jc-id' }, nome,
-      apel[0] && h('span', { class: 'mudo' }, `apelido: ${apel.join(', ')}`), d && d.nivel && h('span', { class: 'mudo' }, `nível ${d.nivel} na GC`)));
+      d && d.nivel && h('span', { class: 'mudo' }, `nível ${d.nivel} na GC`)));
     if (!d || !d.perfil.m6 || !d.perfil.m6.jogador) return h('header', { class: 'cabeca jogador-card' }, quem, h('p', { class: 'nota' }, 'Sem análise: poucas partidas na janela dos últimos 6 meses.'));
     const J = d.perfil.m6.jogador, N = d.perfil.m6.nivel || {};
     const f = d.funcoes, top = f && f.ranking[0];
