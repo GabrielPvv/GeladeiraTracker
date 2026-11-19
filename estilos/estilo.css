@@ -43,3 +43,4 @@
 
 .est-av { display: grid; gap: 10px; }
 .est-tab td.est-cel { background: color-mix(in srgb, var(--cor) var(--calor, 0%), transparent); font-weight: 600; }
+.est-funcao { border-left: 3px solid var(--c2); padding-left: 8px; color: var(--fg) !important; font-size: .88rem; }

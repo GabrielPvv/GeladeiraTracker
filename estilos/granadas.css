@@ -31,3 +31,7 @@
 .gr-nade p { margin: 2px 0; font-size: .82rem; color: var(--mudo); }
 .gr-ver { font-size: .8rem; font-weight: 700; color: var(--acento); }
 .gr-ver small { font-weight: 400; color: var(--mudo); }
+.gr-novo { margin-left: 6px; font-size: .62rem; text-transform: uppercase; letter-spacing: .05em; padding: 1px 6px; border-radius: 999px; color: #fff; background: linear-gradient(135deg, var(--c3), var(--c2)); vertical-align: 2px; }
+.gr-grupo { color: var(--c1); }
+.gr-nade.grupo { border-left-width: 6px; }
+.gr-aviso { border-left: 4px solid var(--aviso); background: color-mix(in srgb, var(--aviso) 10%, var(--card2)); border-radius: 10px; padding: 10px 12px; font-size: .88rem; }

@@ -37,9 +37,15 @@
       const membros = new Map([...pm].map(([n, l]) => [n, { ...somar(l), linhas: l }]));
       // Índices (50 = média do grupo): exposição = primeiro abate e mortes por rodada; impacto = ADR e KAST.
       const idx = (a, b) => Math.max(0, Math.min(100, 50 + ((a - 1) + (b - 1)) / 2 * 50 / 0.3));
-      for (const s of membros.values()) {
+      for (const [n, s] of membros) {
         s.exposicao = idx(s.fkR / grupo.fkR, s.dpr / grupo.dpr);
-        s.impacto = idx(s.adr / grupo.adr, s.kastP / grupo.kastP);
+        // Impacto contra o PRÓPRIO NÍVEL da GC (perfil de 6 meses da Análise), para não punir quem joga num nível mais baixo que a
+        // média do grupo; sem perfil, cai para a média do grupo.
+        const an = G.analise && G.analise.membros && G.analise.membros[n], J = an && an.perfil && an.perfil.m6 && an.perfil.m6.jogador, N = an && an.perfil && an.perfil.m6 && an.perfil.m6.nivel;
+        if (J && N && N.adr && N.kastPct) { s.impacto = idx(J.adr / N.adr, J.kastPct / N.kastPct); s.refImpacto = 'nível'; s.impAdr = [J.adr, N.adr]; s.impKast = [J.kastPct, N.kastPct]; }
+        else { s.impacto = idx(s.adr / grupo.adr, s.kastP / grupo.kastP); s.refImpacto = 'grupo'; }
+        const fn = an && an.funcoes && an.funcoes.sugerida ? an.funcoes.ranking[0] : null;
+        s.funcao = fn ? fn.nome : null;
         s.ok = s.rod >= MIN_ROD;
       }
       return { grupo, membros, partidas: ms.length };
@@ -47,12 +53,14 @@
   }
 
   const QUADS = {
-    aa: { t: 'Agressivo que resolve', d: 'Se expõe mais que o grupo e devolve impacto. Continua abrindo rodadas, mas com o time perto para trocar.' },
-    ab: { t: 'Agressivo que se expõe demais', d: 'Toma muito duelo e morre muito sem devolver dano. Vale jogar mais paciente: entrar em segundo, esperar flash, buscar troca.' },
-    pa: { t: 'Paciente e eficiente', d: 'Se expõe menos e mesmo assim tem impacto: perfil de lurker ou âncora. Pode arriscar um pouco mais quando o time precisar de abertura.' },
-    pb: { t: 'Passivo, pouco impacto', d: 'Se expõe pouco e participa pouco. Precisa ganhar espaço: pegar info, usar utilitário e jogar mais perto da ação.' },
+    aa: { t: 'Abre rodada e resolve', d: 'Se expõe mais que o grupo e devolve impacto acima do próprio nível. Continua abrindo rodadas, com o time perto para trocar.' },
+    ab: { t: 'Abre rodada, mas se expõe demais', d: 'Toma muito duelo e o impacto fica abaixo do próprio nível. Vale entrar em segundo, esperar flash e buscar troca.' },
+    pa: { t: 'Paciente e eficiente', d: 'Se expõe menos que o grupo e mesmo assim rende no próprio nível ou acima: perfil de lurker ou âncora. Pode arriscar mais quando o time precisar de abertura.' },
+    pb: { t: 'Paciente, impacto a crescer', d: 'Se expõe menos que o grupo e o impacto fica abaixo do próprio nível. Dá para ganhar espaço com info, utilitário e jogando mais perto da ação.' },
   };
   const quad = (s) => QUADS[(s.exposicao >= 50 ? 'a' : 'p') + (s.impacto >= 50 ? 'a' : 'b')];
+  // Quem joga de lurker, âncora ou AWP pega menos primeiro abate por função: o veredito diz isso em vez de tratar como falta.
+  const notaFuncao = (s) => (s.funcao && s.exposicao < 50 && /Lurker|Âncora|AWP/.test(s.funcao) ? `Exposição baixa combina com a função provável (${s.funcao}): quem fecha rodada ou segura bomb pega menos primeiro abate.` : null);
 
   // ---------- mapa de estilos (dispersão) ----------
   function mapaEstilos(ctx, destaque) {
@@ -67,7 +75,7 @@
         sv('line', { x1: X(50), x2: X(50), y1: Y(0), y2: Y(100), class: 'linha-ref' }), sv('line', { x1: X(0), x2: X(100), y1: Y(50), y2: Y(50), class: 'linha-ref' }),
         rot(X(98), Y(96), 'agressivo que resolve', 'end'), rot(X(98), Y(3), 'se expõe demais', 'end'), rot(X(2), Y(96), 'paciente e eficiente', 'start'), rot(X(2), Y(3), 'passivo', 'start'),
         sv('text', { x: W / 2, y: H - 6, 'text-anchor': 'middle' }, 'exposição (1º abate e mortes por rodada) →'),
-        sv('text', { x: 12, y: H / 2, 'text-anchor': 'middle', transform: `rotate(-90 12 ${H / 2})` }, 'impacto (ADR e KAST) →'),
+        sv('text', { x: 12, y: H / 2, 'text-anchor': 'middle', transform: `rotate(-90 12 ${H / 2})` }, 'impacto no próprio nível →'),
         ...(() => { const usados = []; return pts.map(([n, s]) => {
           const eu = n === destaque, cx = X(s.exposicao), cy = Y(s.impacto);
           // Nome acima do ponto; se bater em outro nome já colocado, vai para baixo.
@@ -77,7 +85,7 @@
           const g = sv('g', { class: 'est-pt' + (eu ? ' eu' : ''), tabindex: '0' },
             sv('circle', { cx, cy, r: eu ? 11 : 8, class: 'est-bola', fill: 'var(--' + ((avatar(n).className.match(/av\d/) || ['av0'])[0]) + ')' }),
             sv('text', { x: cx, y: ly, 'text-anchor': 'middle', class: 'forte est-nome' }, n));
-          dica(g, () => `${n}: ${quad(s).t} · exposição ${Math.round(s.exposicao)}, impacto ${Math.round(s.impacto)} · 1º abate ${s.fkR.toFixed(3)}/rod., mortes ${s.dpr.toFixed(2)}/rod., ADR ${s.adr.toFixed(1)}, KAST ${Math.round(s.kastP * 100)}%`);
+          dica(g, () => `${n}: ${quad(s).t} · exposição ${Math.round(s.exposicao)}, impacto ${Math.round(s.impacto)} (contra o ${s.refImpacto === 'nível' ? 'próprio nível' : 'grupo'})${s.funcao ? ' · função ' + s.funcao : ''} · 1º abate ${s.fkR.toFixed(3)}/rod., mortes ${s.dpr.toFixed(2)}/rod.`);
           return g;
         }); })());
       el.replaceChildren(svg);
@@ -160,10 +168,10 @@
       `${s.fa100.toFixed(1)} assistências de flash por 100 rodadas (grupo ${G0.fa100.toFixed(1)}).`,
       ['Aprender 2 pop-flashes por bomb nos mapas mais jogados.', 'Combinar com quem abre: flash antes do peek dele.'], `${G0.fa100.toFixed(1)} por 100 rodadas`);
     if (s.exposicao >= 55 && s.impacto < 48) add(0.25 + (s.exposicao - 50) / 100, 'Abrir rodada com apoio',
-      `Se expõe mais que o grupo (exposição ${Math.round(s.exposicao)}) e o impacto fica abaixo (${Math.round(s.impacto)}).`,
+      `Exposição ${Math.round(s.exposicao)} (acima do grupo) com impacto ${Math.round(s.impacto)} (abaixo do próprio nível).`,
       ['Entrar só com flash ou smoke de apoio.', 'Combinar a dupla de entrada: quem abre e quem troca.'], 'impacto 50 ou mais no mapa de estilos');
-    if (s.exposicao < 42 && s.impacto < 48) add(0.25 + (50 - s.exposicao) / 100, 'Ganhar mais participação',
-      `Exposição ${Math.round(s.exposicao)} e impacto ${Math.round(s.impacto)}: pouca presença nas rodadas.`,
+    if (s.exposicao < 42 && s.impacto < 48 && !notaFuncao(s)) add(0.25 + (50 - s.exposicao) / 100, 'Ganhar mais participação',
+      `Exposição ${Math.round(s.exposicao)} e impacto ${Math.round(s.impacto)} (abaixo do próprio nível).`,
       ['Pegar posições de informação e falar no rádio.', 'Jogar perto da dupla principal para trocar e ganhar abates.'], 'KAST e ADR na média do grupo');
     if (rel('mkR') < -0.25) add(-rel('mkR') * 0.6, 'Virar mais rodadas com multiabate',
       `${(s.mkR * 100).toFixed(1)}% das rodadas com 3 ou mais abates (grupo ${(G0.mkR * 100).toFixed(1)}%).`,
@@ -210,13 +218,14 @@
     const Q = quad(s), P = plano(nick, s, D.grupo), av = avancadas(nick);
     const janela = desde() ? `desde ${GT.u.dataBR(desde())}` : 'no ano';
     return [
-      card('Estilo de jogo: agressivo ou paciente?', `Partidas da Geladeira ${janela} (${pl(s.partidas, 'partida', 'partidas')}, ${pl(s.rod, 'rodada', 'rodadas')}). 50 é a média do grupo nos dois eixos.`,
+      card('Estilo de jogo: agressivo ou paciente?', `Exposição: 1º abate e mortes por rodada nas partidas da Geladeira ${janela} (${pl(s.partidas, 'partida', 'partidas')}), contra a média do grupo. Impacto: ADR e KAST contra a média do próprio nível na GC (perfil dos últimos 6 meses). 50 = na média.`,
         h('div', { class: 'est-topo' },
           h('div', { class: 'est-veredito' },
-            h('span', { class: 'rot' }, 'Estilo'), h('b', { class: 'est-tit' }, Q.t), h('p', null, Q.d),
+            h('span', { class: 'rot' }, 'Estilo'), h('b', { class: 'est-tit' }, Q.t), h('p', null, Q.d), notaFuncao(s) && h('p', { class: 'est-funcao' }, notaFuncao(s)),
+            s.impAdr && h('p', { class: 'nota' }, `ADR ${s.impAdr[0].toFixed(1)} contra ${s.impAdr[1].toFixed(1)} do nível · KAST ${s.impKast[0].toFixed(1)}% contra ${s.impKast[1].toFixed(1)}%.`),
             h('div', { class: 'est-medidores' },
               medidor('Exposição', s.exposicao, 'quanto se expõe: 1º abate e mortes por rodada', 'var(--c4)'),
-              medidor('Impacto', s.impacto, 'quanto resolve: ADR e KAST', 'var(--c1)'))),
+              medidor('Impacto', s.impacto, s.refImpacto === 'nível' ? 'ADR e KAST contra a média de quem joga no mesmo nível na GC' : 'ADR e KAST contra a média do grupo (sem perfil de nível)', 'var(--c1)'))),
           mapaEstilos(ctx, nick))),
       card('O que trabalhar', 'Prioridades em ordem, a partir dos números do membro contra o grupo (e contra o nível, quando há estatística avançada).',
         P.length ? h('ol', { class: 'est-plano' }, ...P.map((p, i) => h('li', { class: 'est-item' },
