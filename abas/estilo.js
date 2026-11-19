@@ -8,6 +8,7 @@
   const GT = window.GT, G = GT.G;
   const { h, sv, pl, card, avatar, dica, infoIcone, grafico, linkMembro } = GT.u;
 
+  const f2 = (x) => (Number.isFinite(x) ? x.toFixed(2) : '—');
   const MIN_ROD = 150; // rodadas para um membro entrar nas comparações
   const desde = () => (G.analise && G.analise.janela ? G.analise.janela.desde : null);
   const partidasJanela = (ctx) => { const d = desde(); return d ? ctx.D.partidas.filter((m) => m.d >= d) : ctx.D.partidas; };
@@ -130,7 +131,7 @@
     if (!J || !J.mortes || !J.lados) return null;
     const pctTxt = (x) => (x === null || x === undefined ? '—' : Math.round(x) + '%');
     const lado = (id, rot) => { const l = J.lados[id], ln = N && N.lados ? N.lados[id] : null; return h('div', { class: 'rs-kpi', estilo: `--k:${id === 't' ? 'var(--c4)' : 'var(--c1)'}` },
-      h('span', { class: 'rot' }, rot), h('b', { class: 'rs-kpi-v' }, l.kd.toFixed(2)), h('small', { class: 'mudo' }, `K/D · ${pctTxt(l.vitoriaPct)} das rodadas ganhas${ln ? ` · nível ${ln.kd.toFixed(2)}` : ''}`)); };
+      h('span', { class: 'rot' }, rot), h('b', { class: 'rs-kpi-v' }, f2(l.kd)), h('small', { class: 'mudo' }, `K/D · ${pctTxt(l.vitoriaPct)} das rodadas ganhas${ln ? ` · nível ${f2(ln.kd)}` : ''}`)); };
     const eco = J.economia || {};
     const ECO = [['pistol', 'Pistol'], ['eco', 'Eco'], ['force', 'Force'], ['full', 'Compra cheia']];
     const morte = J.mortes, Nm = N && N.mortes;
@@ -144,7 +145,7 @@
         k('Segundo da rodada em que morre', morte.segundoMediana, Nm && Nm.segundoMediana, false, 'var(--c6)', 'Mediana do momento da morte. Baixo = morre cedo.'),
         k('Clutches ganhos', J.clutch ? J.clutch.pct : null, N && N.clutch ? N.clutch.pct : null, false, 'var(--c2)', 'Rodadas vencidas sozinho contra 1 ou mais.')),
       h('div', { class: 'rs-kpis' }, lado('t', 'Lado T'), lado('ct', 'Lado CT'),
-        ...ECO.filter(([id]) => eco[id] && eco[id].rodadas).map(([id, rot]) => h('div', { class: 'rs-kpi', estilo: '--k:var(--c5)' }, h('span', { class: 'rot' }, rot), h('b', { class: 'rs-kpi-v' }, eco[id].kd.toFixed(2)), h('small', { class: 'mudo' }, `K/D · ${pl(eco[id].rodadas, 'rodada', 'rodadas')} · ${pctTxt(eco[id].vitoriaPct)} ganhas`)))),
+        ...ECO.filter(([id]) => eco[id] && eco[id].rodadas).map(([id, rot]) => h('div', { class: 'rs-kpi', estilo: '--k:var(--c5)' }, h('span', { class: 'rot' }, rot), h('b', { class: 'rs-kpi-v' }, f2(eco[id].kd)), h('small', { class: 'mudo' }, `K/D · ${pl(eco[id].rodadas, 'rodada', 'rodadas')} · ${pctTxt(eco[id].vitoriaPct)} ganhas`)))),
       h('p', { class: 'nota' }, `Estatísticas avançadas da GC (${pl(J.partidas, 'partida', 'partidas')}). "Nível" é a média de quem jogou no mesmo nível nas mesmas partidas.`));
   }
 
@@ -186,7 +187,7 @@
     }
     if (J && J.lados && J.lados.t && J.lados.ct) {
       const t = J.lados.t.kd, ct = J.lados.ct.kd;
-      if (Math.abs(t - ct) / Math.max(t, ct) > 0.2) { const fraco = t < ct ? 'T' : 'CT';
+      if (Number.isFinite(t) && Number.isFinite(ct) && Math.max(t, ct) > 0 && Math.abs(t - ct) / Math.max(t, ct) > 0.2) { const fraco = t < ct ? 'T' : 'CT';
         add(Math.abs(t - ct) / Math.max(t, ct), `Melhorar o lado ${fraco}`, `K/D ${t.toFixed(2)} de T e ${ct.toFixed(2)} de CT.`,
           fraco === 'T' ? ['Treinar as execuções de bomb com o time (smoke, flash, entrada).', 'Revisar demos de rodadas de T perdidas.'] : ['Fixar uma posição de CT por mapa e aprender o retake dela.', 'Treinar segurar ângulo com utilitário de atraso (molotov, HE).'], `K/D de ${fraco} perto do outro lado`); }
     }
@@ -205,8 +206,8 @@
       return h('td', { class: 'est-cel', estilo: `--calor:${a}%;--cor:${d >= 0 ? 'var(--ok)' : 'var(--bad)'}` }, c[2](l[c[0]])); };
     const melhor = [...linhas].sort((a, b) => b.wr - a.wr || b.adr - a.adr)[0], pior = [...linhas].sort((a, b) => a.wr - b.wr || a.adr - b.adr)[0];
     return [h('div', { class: 'rs-destaques' },
-      h('div', { class: 'rs-dest forte' }, h('span', { class: 'rot' }, 'Melhor mapa'), h('b', null, melhor.mp), h('small', null, `${Math.round(melhor.wr * 100)}% de vitórias · K/D ${melhor.kd.toFixed(2)} · ADR ${melhor.adr.toFixed(1)}`)),
-      linhas.length > 1 && h('div', { class: 'rs-dest fraco' }, h('span', { class: 'rot' }, 'Mapa a trabalhar'), h('b', null, pior.mp), h('small', null, `${Math.round(pior.wr * 100)}% de vitórias · K/D ${pior.kd.toFixed(2)} · ADR ${pior.adr.toFixed(1)}`))),
+      h('div', { class: 'rs-dest forte' }, h('span', { class: 'rot' }, 'Melhor mapa'), h('b', null, melhor.mp), h('small', null, `${Math.round(melhor.wr * 100)}% de vitórias · K/D ${f2(melhor.kd)} · ADR ${melhor.adr.toFixed(1)}`)),
+      linhas.length > 1 && h('div', { class: 'rs-dest fraco' }, h('span', { class: 'rot' }, 'Mapa a trabalhar'), h('b', null, pior.mp), h('small', null, `${Math.round(pior.wr * 100)}% de vitórias · K/D ${f2(pior.kd)} · ADR ${pior.adr.toFixed(1)}`))),
       h('div', { class: 'rolar' }, h('table', { class: 'est-tab' }, h('thead', null, h('tr', null, h('th', null, 'Mapa'), ...cols.map((c) => h('th', null, c[1])))),
         h('tbody', null, ...linhas.map((l) => h('tr', null, h('td', null, h('b', null, l.mp)), ...cols.map((c) => cel(l, c))))))),
       h('p', { class: 'nota' }, 'Verde: acima da média do próprio membro em todos os mapas; vermelho: abaixo. Mapas com 3 partidas ou mais.')];
