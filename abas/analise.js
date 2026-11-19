@@ -215,7 +215,7 @@
   GT.registrarAba({ id: 'analise', titulo: 'Análise', ordem: 65, aceitaVazio: true, apelidos: ['analises'],
     rotaLer(resto) { E.membro = resto.join('/') || null; },
     rotaEscrever() { return E.membro ? '/' + E.membro : ''; },
-    render(el) {
+    render(el, ctx) {
       const filtros = document.getElementById('filtros'); if (filtros) { filtros.replaceChildren(); filtros.hidden = true; } // janela fixa: os filtros de período e mapa não se aplicam
       if (!A()) { el.append(h('p', { class: 'vazio' }, 'Análise não disponível nestes dados. Gere o site de novo com: npm run tracker')); return; }
       const nicks = G.membros.map((m) => m.nick);
@@ -227,6 +227,7 @@
       if (!d || !d.perfil.m6 || !d.perfil.m6.jogador) { el.append(cartaoJogador(nick, { titulo: 'h2' }), h('p', { class: 'vazio' }, `${nick} não tem partidas suficientes na janela para a análise.`)); return; }
       el.append(cartaoJogador(nick, { titulo: 'h2' }),
         card('Resumo', null, resumo(nick, d)),
+        ...(GT.estilo && ctx ? GT.estilo.secoes(nick, ctx) : []),
         h('div', { class: 'grade2' },
           card('Pontos fortes', 'O que está acima da média do mesmo nível, do que mais se destaca para o que menos.', listaPontos(d.fortes, 'forte', 'Nenhum número passou do limite acima do nível com amostra suficiente.')),
           card('Pontos fracos', 'O que está abaixo da média do mesmo nível, do pior para o menos pior.', listaPontos(d.fracos, 'fraco', 'Nenhum número ficou abaixo do nível com amostra suficiente.'))),

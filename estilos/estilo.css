@@ -1,0 +1,45 @@
+/* Estilo de jogo (aba Análise e Mapa de estilos da Home). Usa as peças .rs-* do visual.css. */
+.est-topo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 16px; align-items: center; }
+@media (max-width: 760px) { .est-topo { grid-template-columns: minmax(0, 1fr); } }
+.est-veredito { display: grid; gap: 8px; align-content: start; }
+.est-tit { font-size: 1.5rem; line-height: 1.15; background: linear-gradient(90deg, var(--c4), var(--c3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.est-veredito p { margin: 0; color: var(--mudo); }
+.est-medidores { display: grid; gap: 10px; margin-top: 4px; }
+.est-med { display: grid; grid-template-columns: 6.5em 1fr 2.2em; gap: 8px; align-items: center; }
+.est-med b { text-align: right; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.est-med-trilho { position: relative; height: 12px; border-radius: 6px; background: var(--grade); overflow: hidden; }
+.est-med-trilho i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: linear-gradient(90deg, color-mix(in srgb, var(--k) 55%, transparent), var(--k)); }
+.est-med-trilho em { position: absolute; top: -2px; bottom: -2px; border-left: 2px dashed var(--fg); opacity: .5; }
+
+.est-caixa { min-height: 240px; }
+.est-mapa { width: 100%; height: auto; display: block; }
+.est-quad { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; fill: var(--mudo); }
+.est-bola { stroke: var(--card); stroke-width: 2; }
+.est-pt { cursor: help; }
+.est-pt.eu .est-bola { stroke: var(--fg); stroke-width: 3; }
+.est-pt .est-nome { font-size: 11px; font-weight: 600; }
+.est-pt:not(.eu) .est-nome { opacity: .8; }
+
+.est-plano { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.est-item { display: grid; grid-template-columns: 36px 1fr; gap: 12px; padding: 12px; border-radius: 12px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--c4) 12%, var(--card2)), var(--card2)); border: 1px solid color-mix(in srgb, var(--c4) 28%, var(--borda)); }
+.est-item:first-child { background: linear-gradient(135deg, color-mix(in srgb, var(--bad) 16%, var(--card2)), var(--card2)); border-color: color-mix(in srgb, var(--bad) 35%, var(--borda)); }
+.est-num { width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--c4), var(--c3)); }
+.est-item p { margin: 2px 0 6px; font-size: .88rem; }
+.est-item ul { margin: 0 0 6px; padding-left: 18px; font-size: .88rem; display: grid; gap: 2px; }
+.est-meta { color: var(--mudo); }
+
+.est-perfil { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 12px; }
+.est-grupo { display: grid; gap: 6px; align-content: start; padding: 10px 12px; border-radius: 12px; background: var(--card2); }
+.est-grupo h3 { font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; color: var(--mudo); }
+.est-linha { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(70px, 1fr) auto; grid-template-rows: auto auto; column-gap: 8px; align-items: center; font-size: .85rem; }
+.est-linha small { grid-column: 3; color: var(--mudo); font-size: .7rem; text-align: right; }
+.est-linha b { grid-column: 3; grid-row: 1; text-align: right; font-variant-numeric: tabular-nums; }
+.est-rot { grid-row: 1 / span 2; }
+.est-barra { grid-row: 1 / span 2; position: relative; height: 8px; border-radius: 4px; background: var(--grade); }
+.est-barra::after { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; border-left: 1px dashed var(--ref); }
+.est-barra i { position: absolute; top: 0; bottom: 0; border-radius: 4px; background: var(--ref); }
+.est-barra i.ok { background: var(--ok); } .est-barra i.bad { background: var(--bad); }
+
+.est-av { display: grid; gap: 10px; }
+.est-tab td.est-cel { background: color-mix(in srgb, var(--cor) var(--calor, 0%), transparent); font-weight: 600; }

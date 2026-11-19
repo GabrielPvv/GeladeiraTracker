@@ -1,0 +1,33 @@
+/* Aba Granadas: escolha de mapa, filtros e cartões de granada (link para o csnades.gg). */
+.gr-mapas { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.gr-mapa { display: grid; gap: 2px; padding: 10px 12px; border-radius: 12px; text-decoration: none; color: var(--fg);
+  background: var(--card); border: 1px solid var(--borda); transition: border-color .15s, transform .1s; }
+.gr-mapa:hover { border-color: var(--c1); transform: translateY(-1px); }
+.gr-mapa small { color: var(--mudo); font-size: .75rem; }
+.gr-mapa.ativo { background: linear-gradient(135deg, color-mix(in srgb, var(--c1) 26%, var(--card)), color-mix(in srgb, var(--c2) 20%, var(--card))); border-color: var(--c1); }
+.gr-todas { text-decoration: none; }
+.gr-filtros { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.gr-grupo-f { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 3px; border-radius: 10px; background: var(--card2); border: 1px solid var(--borda); }
+.gr-filtro { border: 0; background: none; border-radius: 8px; padding: 6px 12px; cursor: pointer; color: var(--mudo); font-weight: 600; min-height: 34px; }
+.gr-filtro:hover { color: var(--fg); }
+.gr-filtro.ativo { color: var(--fg); background: linear-gradient(135deg, color-mix(in srgb, var(--c1) 30%, var(--card)), color-mix(in srgb, var(--c2) 26%, var(--card))); }
+.gr-areas { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; align-items: start; }
+.gr-area { display: grid; gap: 8px; }
+.gr-area h3 { font-size: .85rem; text-transform: uppercase; letter-spacing: .05em; }
+.gr-area h3 small { color: var(--mudo); }
+.gr-lista { display: grid; gap: 8px; }
+.gr-nade { --k: var(--c1); display: grid; gap: 3px; padding: 10px 12px; border-radius: 12px; text-decoration: none; color: var(--fg);
+  background: linear-gradient(150deg, color-mix(in srgb, var(--k) 16%, var(--card2)), var(--card2)); border: 1px solid color-mix(in srgb, var(--k) 30%, var(--borda));
+  border-left: 4px solid var(--k); transition: transform .1s, box-shadow .15s; }
+.gr-nade:hover { transform: translateY(-1px); box-shadow: var(--sombra); }
+.gr-nade-topo { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: .72rem; }
+.gr-ico { font-size: 1rem; line-height: 1; }
+.gr-tipo { color: var(--k); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+.gr-lado { border-radius: 999px; padding: 1px 8px; font-weight: 700; color: #fff; }
+.gr-lado.t { background: #b8661c; } .gr-lado.ct { background: #2d6cb5; }
+.gr-top { margin-left: auto; color: var(--aviso); font-weight: 700; }
+.gr-alvo { font-size: 1.1rem; }
+.gr-de { color: var(--mudo); }
+.gr-nade p { margin: 2px 0; font-size: .82rem; color: var(--mudo); }
+.gr-ver { font-size: .8rem; font-weight: 700; color: var(--acento); }
+.gr-ver small { font-weight: 400; color: var(--mudo); }
