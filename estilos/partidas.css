@@ -1,0 +1,55 @@
+/* Aba Partidas (abas/partidas.js) */
+.pt-lista { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+.pt-item { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px 12px; border: 1px solid var(--borda); border-radius: 10px; background: var(--card); color: var(--fg); cursor: pointer; font: inherit; min-width: 96px; }
+.pt-item.ativo { border-color: var(--acento); box-shadow: 0 0 0 1px var(--acento) inset; }
+.pt-item:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+.pt-mapa { font-size: .85em; color: var(--mudo); }
+.pt-topo { margin: 0; }
+.pt-virada { color: var(--acento); font-weight: 600; }
+.pt-trechos { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.pt-trechos li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; padding: 6px 10px; border-left: 3px solid var(--borda); background: var(--card2); border-radius: 6px; }
+.pt-trechos li.v { border-left-color: var(--ok); }
+.pt-trechos li.d { border-left-color: var(--bad); }
+.pt-r { font-variant-numeric: tabular-nums; color: var(--mudo); min-width: 56px; }
+.pt-lado { font-size: .75em; padding: 1px 6px; border-radius: 6px; border: 1px solid var(--borda); }
+.pt-duas { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.pt-duas h4 { margin: 0 0 6px; }
+.pt-ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.pt-jogs { display: grid; gap: 14px; }
+.pt-jog { border: 1px solid var(--borda); border-radius: 10px; padding: 10px 12px; background: var(--card2); }
+.pt-jog-topo { display: flex; align-items: center; gap: 8px; }
+.pt-num { margin: 4px 0 8px; font-size: .9em; }
+.pt-blocos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.pt-bloco h5 { margin: 0 0 4px; font-size: .95em; }
+.pt-bloco.bom h5 { color: var(--ok); }
+.pt-bloco.ruim h5 { color: var(--bad); }
+.pt-bloco.pri h5 { color: var(--acento); }
+.pt-bloco.nao h5 { color: var(--mudo); }
+.pt-mortes { margin-top: 8px; }
+.pt-mortes ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 3px; font-size: .9em; }
+.pt-cat { display: inline-block; font-size: .75em; padding: 0 6px; border-radius: 6px; border: 1px solid var(--borda); margin: 0 4px; white-space: nowrap; }
+.pt-cat.refem { color: var(--mudo); }
+.pt-cat.abertura { color: var(--bad); border-color: var(--bad); }
+.pt-cat.sozinho { color: var(--aviso); border-color: var(--aviso); }
+.pt-cat.trocada { color: var(--ok); border-color: var(--ok); }
+.pt-rods { display: grid; gap: 4px; }
+.pt-rod { border-left: 3px solid var(--borda); padding: 4px 8px; background: var(--card2); border-radius: 6px; }
+.pt-rod.v { border-left-color: var(--ok); }
+.pt-rod.d { border-left-color: var(--bad); }
+.pt-rod summary { cursor: pointer; font-size: .92em; }
+.pt-ev { margin: 6px 0 4px; padding-left: 18px; display: grid; gap: 2px; font-size: .9em; }
+.pt-ev li.nos { color: var(--fg); }
+.pt-ev li.eles { color: var(--mudo); }
+.pt-ev li.plant { color: var(--aviso); }
+.pt-decisoes { display: grid; gap: 10px; padding: 8px 0 4px; border-bottom: 1px solid var(--borda); margin-bottom: 6px; }
+.pt-time { margin-bottom: 14px; }
+.pt-time h4 { margin: 0 0 6px; }
+.pt-lados { margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--borda); }
+.pt-lados h5 { margin: 0 0 4px; }
+.pt-econ { margin: 6px 0; font-size: .88em; }
+.pt-sub { margin: 10px 0 2px; font-size: .9em; }
+.pt-imp { font-variant-numeric: tabular-nums; font-weight: 600; }
+.pt-imp.mais { color: var(--ok); }
+.pt-imp.menos { color: var(--bad); }
+.pt-rod[open] { padding-bottom: 8px; }
+@media (max-width: 420px) { .pt-item { min-width: 80px; padding: 6px 8px; } }
