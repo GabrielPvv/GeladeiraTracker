@@ -1,0 +1,4 @@
+/* Aba Combate da página do jogador (demos do ano; não segue o filtro). Usa as peças .rs-* do visual.css. */
+.cb-duas { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start; }
+@media (min-width: 1000px) { .cb-duas { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.cb-lugar { display: flex; align-items: center; gap: 4px; font-size: .88rem; }

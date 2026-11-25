@@ -1,11 +1,11 @@
 /* Aba Adversários: busca por nick e ficha do adversário (usa as peças .rs-* e .pilula do visual.css). */
 .adv-busca { display: flex; gap: 8px; flex-wrap: wrap; }
-.adv-busca input { flex: 1 1 260px; min-height: 42px; font-size: 1rem; padding: 8px 12px; border-radius: 10px; }
+.adv-busca input { flex: 1 1 260px; min-height: 42px; font-size: 1rem; padding: 8px 12px; border-radius: 8px; }
 .adv-rapidos { display: grid; gap: 6px; }
 .chip-m.ativo { border-color: var(--acento); background: color-mix(in srgb, var(--acento) 18%, var(--card2)); }
 .adv-ficha { gap: 14px; }
 .adv-cab { display: flex; gap: 14px; align-items: center; min-width: 0; }
-.adv-av { background: linear-gradient(135deg, var(--c4), var(--c3)); }
+.adv-av { background: var(--eles); color: var(--bg); }
 .adv-id { display: grid; gap: 2px; min-width: 0; }
 .adv-id h2 { font-size: 1.7rem; overflow-wrap: anywhere; }
 .adv-id h2::before { display: none; }
@@ -14,7 +14,7 @@
 .adv-notas div { display: grid; grid-template-columns: 8.5em 1fr 2em; gap: 6px; align-items: center; font-size: .78rem; color: var(--mudo); }
 .adv-notas em { font-style: normal; text-align: right; color: var(--fg); font-variant-numeric: tabular-nums; }
 .adv-mapa { padding: 2px 10px; }
-.adv-col { border-radius: 12px; padding: 12px; display: grid; gap: 8px; align-content: start; background: var(--card2); }
+.adv-col { border-radius: 8px; padding: 12px; display: grid; gap: 8px; align-content: start; background: var(--card2); }
 .adv-col.forte { background: color-mix(in srgb, var(--ok) 8%, var(--card2)); border: 1px solid color-mix(in srgb, var(--ok) 35%, var(--borda)); }
 .adv-col.fraco { background: color-mix(in srgb, var(--bad) 8%, var(--card2)); border: 1px solid color-mix(in srgb, var(--bad) 35%, var(--borda)); }
 .adv-col h3 { font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; }
@@ -24,3 +24,26 @@
 .adv-tend.forte { border-left-color: var(--ok); } .adv-tend.fraco { border-left-color: var(--bad); }
 .adv-tend small { color: var(--mudo); font-size: .78rem; }
 @media (max-width: 480px) { .adv-cab { align-items: flex-start; } .adv-id h2 { font-size: 1.4rem; } .adv-av { --tam: 48px !important; } }
+/* Onda U8: fichas e listas em tabela; rótulos neutros (sem verde e vermelho de bom e ruim). */
+.adv-nums { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; margin: 0; background: var(--borda); border: 1px solid var(--borda); border-radius: 8px; overflow: hidden; }
+.adv-nums > div { background: var(--card2); padding: 10px 12px; display: grid; gap: 2px; align-content: start; }
+.adv-nums dt { font-size: .75rem; color: var(--mudo); }
+.adv-nums dd { margin: 0; font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.adv-tab-num td, .adv-tab-niveis td { font-variant-numeric: tabular-nums; }
+.adv-dif.acima { color: var(--fg); font-weight: 600; } .adv-dif.abaixo { color: var(--mudo); font-weight: 600; } .adv-dif.neutro { color: var(--mudo); }
+.adv-tab-niveis .adv-grupo th { text-align: left; background: var(--card2); color: var(--mudo); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+.adv-col.acima, .adv-col.abaixo { background: var(--card2); border: 1px solid var(--borda); }
+.adv-col.acima h3, .adv-col.abaixo h3 { color: var(--mudo); }
+.adv-tend.acima { border-left-color: var(--acento); } .adv-tend.abaixo { border-left-color: var(--borda); }
+th .ordenar.ativo { color: var(--acento); }
+@media (max-width: 600px) { .adv-nums { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Celular: a tabela de níveis cabe em 400 px sem rolagem lateral (colunas fixas, espaçamento menor, sem a barrinha do win rate; os números ficam). */
+@media (max-width: 480px) {
+  .adv-tab-niveis { table-layout: fixed; font-size: 12.5px; }
+  .adv-tab-niveis th, .adv-tab-niveis td { padding: 6px 4px; }
+  .adv-tab-niveis thead th:first-child { width: 34%; }
+  .adv-tab-niveis thead th:not(:first-child) { width: 22%; }
+  .adv-tab-niveis td.quebra { white-space: normal; overflow-wrap: anywhere; }
+  .adv-tab-niveis .wrcel { background-image: none !important; }
+  .adv-tab-niveis .adv-grupo th { font-size: .7rem; letter-spacing: .02em; white-space: normal; }
+}

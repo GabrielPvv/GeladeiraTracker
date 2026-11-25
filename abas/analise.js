@@ -1,18 +1,20 @@
-// Aba "Análise": análise individual de um membro (#analise/<nick>), vinda do motor de src\analise (janela fixa dos últimos 6 meses).
-// Também exporta GT.cartaoJogador(nick), o cabeçalho "card de jogador" (avatar, função provável, 3 números e radar) usado na página do membro.
-// Os dados ficam em window.GELADEIRA.analise (sem SteamID). Nenhuma comparação entre dois membros: a referência é a média do mesmo nível.
+// Aba "Análise · últimos 6 meses" da página do jogador (#jogadores/<nick>/analise; #analise/<nick> abre ela): análise individual vinda do motor de src\analise.
+// Ordem na tela: (1) maior destaque e maior ponto de atenção, (2) Pontos fortes | O que trabalhar (contra o nível e contra o grupo), (3) estilo de jogo,
+// (4) blocos recolhidos (radar e números contra o nível, perfil completo, momento da morte e lados, melhor função, duelos, limites).
+// Os dados ficam em window.GELADEIRA.analise (sem SteamID). Nenhuma comparação entre dois jogadores: a referência é a média do mesmo nível.
 (function () {
   'use strict';
   const GT = window.GT, G = GT.G;
-  const { h, sv, pl, E, card, avatar, rotuloMembro, infoIcone, dica, barra, dataBR, paramsTexto } = GT.u;
+  const { h, sv, pl, card, selo, rotuloMembro, infoIcone, dica, barra, dataBR, paramsTexto } = GT.u;
 
   const A = () => G.analise || null;
   const dadosDe = (nick) => (A() && A().membros && A().membros[nick]) || null;
   const fmt = (v, d = 1) => (v === null || v === undefined || !Number.isFinite(Number(v)) ? '—' : Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }));
   const val = (v, d, u) => (v === null || v === undefined ? '—' : fmt(v, d ?? 1) + (u || ''));
-  const difTexto = (dif) => `${Math.round(Math.abs(dif) * 100)}% ${dif >= 0 ? 'melhor' : 'pior'}`;
+  const difTexto = (dif) => `${Math.round(Math.abs(dif) * 100)}% ${dif >= 0 ? 'acima' : 'abaixo'}`;
   const janelaTexto = () => { const a = A(); return a ? `últimos ${a.janela.meses} meses (de ${dataBR(a.janela.desde)} a ${dataBR(a.geradoEm)})` : ''; };
-  const linkAnalise = (nick) => '#analise/' + encodeURIComponent(nick) + '?' + paramsTexto();
+  const linkAnalise = (nick) => '#jogadores/' + encodeURIComponent(nick) + '/analise?' + paramsTexto();
+  GT.linkAnalise = linkAnalise;
 
   // ---------- radar de 5 eixos ----------
   // Cada eixo compara o número do jogador com a média dos membros (mesma janela, perfil da GC). Média = 50; 30% acima da média = 100; 30% abaixo = 0.
@@ -39,7 +41,7 @@
     const razao = e.melhor === 'menor' ? ref / Math.max(v, 1e-9) : v / ref;
     return Math.max(0, Math.min(100, 50 + ((razao - 1) * 50) / FOLGA));
   };
-  const textoEscala = `Cada ponta é um número do perfil da GC nos ${A() ? A().janela.meses : 6} meses: abate (abates por rodada), sobrevivência (mortes por rodada, ao contrário: menos mortes sobe), impacto (ADR), mira (% de abates na cabeça) e suporte (assistências por rodada). A linha tracejada (50) é a média dos membros com amostra suficiente. Cada eixo vai de 0 (30% pior que a média) a 100 (30% melhor que a média); o centro é 0 e a borda é 100.`;
+  const textoEscala = `Cada ponta é um número do perfil da GC nos ${A() ? A().janela.meses : 6} meses: abate (abates por rodada), sobrevivência (mortes por rodada, ao contrário: menos mortes sobe), impacto (ADR), mira (% de abates na cabeça) e suporte (assistências por rodada). A linha tracejada (50) é a média dos membros com amostra suficiente. Cada eixo vai de 0 (30% abaixo da média) a 100 (30% acima da média); o centro é 0 e a borda é 100.`;
 
   function radar(nick, d) {
     const ref = mediaGrupo(), J = d.perfil.m6.jogador;
@@ -66,38 +68,7 @@
       h('figcaption', { class: 'legenda' }, h('span', null, h('i', { class: 'lg-jogador' }), rotuloMembro(nick)), h('span', null, h('i', { class: 'lg-media' }), 'média do grupo (50)'), infoIcone(textoEscala)));
   }
 
-  // ---------- card de jogador ----------
-  const grande = (rot, valor, ref, melhor) => {
-    const dif = valor !== null && ref ? (valor - ref) / ref * (melhor === 'menor' ? -1 : 1) : null;
-    return h('div', { class: 'jc-num' }, h('span', { class: 'rot' }, rot), h('b', { class: 'grande' }, valor),
-      ref !== null && h('small', { class: dif === null ? 'mudo' : dif >= 0 ? 'ok' : 'bad' }, `nível ${ref}`));
-  };
-  function cartaoJogador(nick, { titulo = 'h1' } = {}) {
-    const d = dadosDe(nick);
-    const nome = h(titulo, { class: 'jc-nome' }, nick);
-    const quem = h('div', { class: 'jc-quem' }, avatar(nick, 76), h('div', { class: 'jc-id' }, nome,
-      d && d.nivel && h('span', { class: 'mudo' }, `nível ${d.nivel} na GC`)));
-    if (!d || !d.perfil.m6 || !d.perfil.m6.jogador) return h('header', { class: 'cabeca jogador-card' }, quem, h('p', { class: 'nota' }, 'Sem análise: poucas partidas na janela dos últimos 6 meses.'));
-    const J = d.perfil.m6.jogador, N = d.perfil.m6.nivel || {};
-    const f = d.funcoes, top = f && f.ranking[0];
-    const funcao = f && f.sugerida && top
-      ? h('div', { class: 'jc-funcao' }, h('span', { class: 'rot' }, 'Função provável'), h('b', null, top.nome), h('small', null, `nota ${top.nota} de 100`), f.amostraPequena && h('span', { class: 'selo' }, 'amostra pequena'),
-        infoIcone(`Estimativa pelas estatísticas avançadas da GC (${pl(f.partidasAvancadas, 'partida', 'partidas')}). Veja o porquê na seção "Melhor função" da aba Análise.`))
-      : h('div', { class: 'jc-funcao' }, h('span', { class: 'rot' }, 'Função provável'), h('b', { class: 'mudo' }, 'sem dados avançados'));
-    return h('header', { class: 'cabeca jogador-card' },
-      h('div', { class: 'jc-esq' }, quem, funcao,
-        h('div', { class: 'jc-nums' }, grande('K/D', fmt(J.kd, 2), N.kd !== undefined ? fmt(N.kd, 2) : null, 'maior'), grande('ADR', fmt(J.adr, 1), N.adr !== undefined ? fmt(N.adr, 1) : null, 'maior'), grande('Rating aprox.', fmt(J.rating, 2), N.rating !== undefined ? fmt(N.rating, 2) : null, 'maior')),
-        h('p', { class: 'nota' }, `${pl(d.base.partidasJanela, 'partida', 'partidas')} nos ${janelaTexto()}. "Nível" é a média de quem jogou no mesmo nível nas mesmas partidas.`)),
-      radar(nick, d));
-  }
-  GT.cartaoJogador = cartaoJogador;
-  GT.linkAnalise = linkAnalise;
-
-  // ---------- seções ----------
-  const seletor = (atual) => h('nav', { class: 'sel-membros', 'aria-label': 'Escolher membro' },
-    ...G.membros.map((m) => h('a', { href: linkAnalise(m.nick), class: 'chip-m' + (m.nick === atual ? ' ativo' : ''), 'aria-current': m.nick === atual ? 'page' : null, title: m.nick }, avatar(m.nick, 20), h('span', { class: 'chip-m-nome' }, rotuloMembro(m.nick)))));
-
-  // Resumo visual: base da amostra, 5 números contra o nível (barra do membro x barra do nível), placar de fortes x fracos e os destaques.
+  // ---------- topo: destaques; recolhido: números contra o nível ----------
   const KPIS = [
     { rot: 'K/D', campo: 'kd', d: 2, cor: 'var(--c1)' },
     { rot: 'ADR', campo: 'adr', d: 1, cor: 'var(--c2)' },
@@ -117,50 +88,75 @@
         dif !== null && h('span', { class: 'rs-dif ' + tipo }, tipo === 'neutro' ? 'na média' : `${dif > 0 ? '▲' : '▼'} ${Math.round(Math.abs(dif) * 100)}%`)),
       h('b', { class: 'rs-kpi-v' }, val(v, k.d, k.u)),
       temRef && h('div', { class: 'rs-cmp' },
-        h('div', null, h('span', null, 'membro'), h('span', { class: 'rs-trilho' }, h('i', { class: 'eu', estilo: larg(v) }))),
+        h('div', null, h('span', null, 'jogador'), h('span', { class: 'rs-trilho' }, h('i', { class: 'eu', estilo: larg(v) }))),
         h('div', null, h('span', null, 'nível'), h('span', { class: 'rs-trilho' }, h('i', { class: 'ref', estilo: larg(ref) }))),
         h('span', null, `média do nível: ${val(ref, k.d, k.u)}`)));
   };
-  const resumo = (nick, d) => {
-    const J = d.perfil.m6.jogador, N = d.perfil.m6.nivel || {}, f = d.funcoes && d.funcoes.sugerida ? d.funcoes.ranking[0] : null;
-    const maisForte = d.fortes[0], maisFraco = d.fracos[0];
+  const numerosNivel = (d) => {
+    const J = d.perfil.m6.jogador, N = d.perfil.m6.nivel || {};
     const nf = d.fortes.length, nr = d.fracos.length, tot = nf + nr;
-    const dest = (tipo, rot, titulo, texto) => h('div', { class: 'rs-dest ' + tipo }, h('span', { class: 'rot' }, rot), h('b', null, titulo), texto && h('small', null, texto));
     return h('div', { class: 'rs' },
-      h('div', { class: 'rs-base' },
-        h('span', { class: 'pilula', estilo: '--p:var(--c1)' }, h('b', null, d.base.partidasJanela), d.base.partidasJanela === 1 ? 'partida na base' : 'partidas na base'),
-        h('span', { class: 'pilula', estilo: '--p:var(--c2)' }, h('b', null, d.base.partidasAvancadas), 'com GC avançada'),
-        h('span', { class: 'pilula', estilo: '--p:var(--c6)' }, janelaTexto())),
       h('div', { class: 'rs-kpis' }, ...KPIS.map((k) => kpi(k, J, N))),
-      h('div', { class: 'rs-placar', 'aria-label': `${pl(nf, 'ponto forte', 'pontos fortes')} e ${pl(nr, 'ponto fraco', 'pontos fracos')}` },
+      h('div', { class: 'rs-placar', 'aria-label': `${pl(nf, 'ponto forte', 'pontos fortes')} e ${pl(nr, 'ponto a trabalhar', 'pontos a trabalhar')}` },
         h('span', { class: 'ok' }, h('b', null, nf), nf === 1 ? 'ponto forte' : 'pontos fortes'),
         tot > 0 && h('span', { class: 'rs-balanca', 'aria-hidden': 'true' }, h('i', { estilo: `width:${(nf / tot) * 100}%` }), h('i', { estilo: `width:${(nr / tot) * 100}%` })),
-        h('span', { class: 'bad' }, h('b', null, nr), nr === 1 ? 'ponto fraco' : 'pontos fracos'),
-        infoIcone('Contra a média de quem jogou no mesmo nível nas mesmas partidas; só entram números com amostra suficiente.')),
-      h('div', { class: 'rs-destaques' },
-        maisForte && dest('forte', 'Maior destaque', maisForte.rotulo, `${difTexto(maisForte.diferencaRelativa)} que o nível · ${val(maisForte.valor, maisForte.decimais, maisForte.unidade)} contra ${val(maisForte.referencia, maisForte.decimais, maisForte.unidade)}`),
-        maisFraco && dest('fraco', 'Maior ponto de atenção', maisFraco.rotulo, `${difTexto(maisFraco.diferencaRelativa)} que o nível · ${val(maisFraco.valor, maisFraco.decimais, maisFraco.unidade)} contra ${val(maisFraco.referencia, maisFraco.decimais, maisFraco.unidade)}`),
-        f && dest('funcao', 'Função mais provável', f.nome, `nota ${f.nota} de 100${d.funcoes.amostraPequena ? ' · amostra pequena' : ''}`)));
+        h('span', { class: 'bad' }, h('b', null, nr), nr === 1 ? 'ponto a trabalhar' : 'pontos a trabalhar'),
+        infoIcone('Contra a média de quem jogou no mesmo nível nas mesmas partidas; só entram números com amostra suficiente.')));
+  };
+  // Topo da aba: maior destaque e maior ponto de atenção (contra o nível). A função provável fica no cabeçalho da página.
+  const destaques = (d) => {
+    const maisForte = d.fortes[0], maisFraco = d.fracos[0];
+    const dest = (tipo, rot, titulo, texto) => h('div', { class: 'rs-dest ' + tipo }, h('span', { class: 'rot' }, rot), h('b', null, titulo), texto && h('small', null, texto));
+    const txt = (x) => `${difTexto(x.diferencaRelativa)} do nível · ${val(x.valor, x.decimais, x.unidade)} contra ${val(x.referencia, x.decimais, x.unidade)}`;
+    return h('div', { class: 'rs-destaques' },
+      maisForte ? dest('forte', 'Maior destaque', maisForte.rotulo, txt(maisForte)) : dest('forte', 'Maior destaque', 'Nenhum número passou do limite', 'com amostra suficiente'),
+      maisFraco ? dest('fraco', 'Maior ponto de atenção', maisFraco.rotulo, txt(maisFraco)) : dest('fraco', 'Maior ponto de atenção', 'Nenhum número abaixo do nível', 'com amostra suficiente'));
   };
 
-  const itemPonto = (x, tipo) => h('li', { class: 'ponto-item ' + tipo },
-    h('div', { class: 'pi-topo' }, h('b', null, x.rotulo), x.info && infoIcone(x.info), h('span', { class: 'selo' }, x.fonte)),
+  // ---------- duas colunas: Pontos fortes | O que trabalhar ----------
+  // Cada item mostra o selo da régua ("contra o nível" ou "contra o grupo") e, nos itens a trabalhar, "o que treinar" embaixo.
+  const treino = (itens, acomp) => itens && itens.length ? h('div', { class: 'pi-treino' }, h('span', { class: 'rot' }, 'O que treinar'), h('ul', null, ...itens.map((t) => h('li', null, t))),
+    acomp && h('small', { class: 'mudo' }, `Acompanhar: ${acomp.rotulo}, hoje ${fmt(acomp.atual, acomp.decimais)}${acomp.unidade || ''}; meta: ${acomp.textoMeta}.`)) : null;
+  const itemPonto = (x, tipo, rec) => h('li', { class: 'ponto-item ' + tipo },
+    h('div', { class: 'pi-topo' }, h('b', null, x.rotulo), x.info && infoIcone(`${x.info} Amostra: ${fmt(x.amostra, 0)} (mínimo ${fmt(x.amostraMinima, 0)}).`), selo('contra o nível')),
     h('div', { class: 'pi-nums' }, h('span', { class: 'pi-v ' + (tipo === 'forte' ? 'ok' : 'bad') }, val(x.valor, x.decimais, x.unidade)), h('span', { class: 'mudo' }, `nível ${val(x.referencia, x.decimais, x.unidade)}`),
       h('span', { class: 'pi-dif ' + (tipo === 'forte' ? 'ok' : 'bad') }, difTexto(x.diferencaRelativa))),
-    h('small', { class: 'mudo' }, `amostra: ${fmt(x.amostra, 0)} (mínimo ${fmt(x.amostraMinima, 0)})`));
-  const listaPontos = (itens, tipo, vazio) => (itens.length ? h('ul', { class: 'pontos' }, ...itens.map((x) => itemPonto(x, tipo))) : h('p', { class: 'vazio' }, vazio));
+    rec && treino(rec.treinar, rec.acompanhar));
+  const itemGrupo = (p) => h('li', { class: 'ponto-item trabalhar' },
+    h('div', { class: 'pi-topo' }, h('b', null, p.titulo), selo('contra o grupo')),
+    h('p', { class: 'mudo pi-porque' }, p.porque), treino(p.treino), h('small', { class: 'mudo' }, 'Meta: ', h('b', null, p.meta)));
+  // Mostra os primeiros itens e deixa o resto atrás de "Ver mais" (um details fechado dentro da coluna).
+  const lista = (itens, visiveis, vazio) => {
+    if (!itens.length) return h('p', { class: 'vazio' }, vazio);
+    const ul = (xs) => h('ul', { class: 'pontos' }, ...xs);
+    const resto = itens.slice(visiveis);
+    return h('div', { class: 'pi-lista' }, ul(itens.slice(0, visiveis)),
+      resto.length > 0 && h('details', { class: 'an-mais' }, h('summary', null, `Ver mais ${resto.length}`), ul(resto)));
+  };
+  // Mesma regra do catálogo (src\analise\catalogo.mjs, tipoDe): qual recomendação cada métrica fraca dispara. A recomendação aparece embaixo da primeira métrica do tipo.
+  const TIPO = { hsPct: 'mira_cabeca', accuracy: 'mira_precisao', cegados_por_flash: 'flashes', flash_assist_100: 'flashes', dano_granada_pr: 'granadas', entrada_t_pct: 'entrada_t', entrada_ct_pct: 'entrada_ct',
+    duelo_23_pct: 'duelo_troca', kd_t: 'lado_t', kd_ct: 'lado_ct', eco_full_kd: 'compra_cheia', eco_pistol_kd: 'pistol', eco_eco_kd: 'eco_force', eco_force_kd: 'eco_force', clutch_pct: 'clutch',
+    morte_antes30_pct: 'morrer_cedo', demo_morte_antes30_pct: 'morrer_cedo', morte_sem_troca_pct: 'sem_troca', demo_morte_sem_troca_pct: 'sem_troca', troca_tempo: 'sem_troca', trocas_100: 'sem_troca',
+    mortes_trocadas_pct: 'sem_troca', demo_morte_cego_pct: 'cego', adr: 'dano_rodada', kastPct: 'kast', tendencia_rating: 'tendencia' };
+  const tipoDe = (id) => (id.startsWith('mapa:') ? 'mapa_abaixo' : id.startsWith('demo_hs_') ? 'mira_cabeca' : TIPO[id] || null);
+  function colunaTrabalhar(d, plano) {
+    const usadas = new Set(), recs = d.recomendacoes || [];
+    const itens = d.fracos.map((x) => { const t = tipoDe(x.id), rec = t && !usadas.has(t) ? recs.find((r) => r.tipo === t) : null; if (rec) usadas.add(t); return itemPonto(x, 'trabalhar', rec); });
+    for (const r of recs) if (!usadas.has(r.tipo)) itens.push(h('li', { class: 'ponto-item trabalhar' }, h('div', { class: 'pi-topo' }, h('b', null, r.titulo), selo('contra o nível')), h('p', { class: 'mudo pi-porque' }, r.achado), treino(r.treinar, r.acompanhar)));
+    for (const p of plano || []) itens.push(itemGrupo(p));
+    return lista(itens, 3, 'Nenhum número ficou abaixo do nível nem do grupo com amostra suficiente.');
+  }
 
-  const recomendacao = (r) => h('article', { class: 'rec' },
-    h('h3', null, r.titulo), h('p', null, r.achado), ...(r.outrosAchados || []).map((t) => h('p', { class: 'mudo' }, t)),
-    h('div', null, h('span', { class: 'rot' }, 'O que treinar'), h('ul', null, ...r.treinar.map((t) => h('li', null, t)))),
-    r.acompanhar && h('p', { class: 'acomp' }, h('b', null, 'Acompanhar: '), `${r.acompanhar.rotulo}, hoje ${fmt(r.acompanhar.atual, r.acompanhar.decimais)}${r.acompanhar.unidade || ''}; meta: ${r.acompanhar.textoMeta}.`));
+  // Bloco recolhido (details fechado): título com selo, nota de uma linha e o conteúdo.
+  const recolhido = (titulo, nota, ...kids) => h('details', { class: 'card an-rec' },
+    h('summary', null, h('span', { class: 'card-t' }, titulo.t || titulo), ...((titulo.selos || []).map((x) => selo(x[0], x[1])))), nota && h('p', { class: 'nota' }, nota), ...kids);
 
   function secaoFuncao(d) {
     const f = d.funcoes;
-    if (!f) return card('Melhor função', null, h('p', { class: 'vazio' }, 'Sem estatísticas avançadas da GC na janela: não dá para estimar a função.'));
+    if (!f) return recolhido('Melhor função', null, h('p', { class: 'vazio' }, 'Sem estatísticas avançadas da GC na janela: não dá para estimar a função.'));
     const top = f.ranking[0];
     const porque = top.componentes.map((c) => h('li', null, h('b', null, c.rotulo), `: ${val(c.valor, c.decimais, c.unidade)} contra ${val(c.referencia, c.decimais, c.unidade)} de referência (${c.pts} pontos, peso ${Math.round(c.pesoReal * 100)}%)`));
-    return card('Melhor função', `Nota de 0 a 100 para cada função, só com números do motor de análise. Cada número do jogador é comparado com a média do mesmo nível: igual ao nível vale 50 e o dobro vale 100. A AWP usa a participação da arma (50% ou mais vale 100). ${f.amostraPequena ? `Amostra pequena: só ${pl(f.partidasAvancadas, 'partida', 'partidas')} com estatísticas avançadas (mínimo ${f.minimoPartidas}).` : ''}`,
+    return recolhido({ t: 'Melhor função', selos: [['GC avançada', 'destaque']] }, `Nota de 0 a 100 para cada função, só com números do motor de análise. Cada número do jogador é comparado com a média do mesmo nível: igual ao nível vale 50 e o dobro vale 100. A AWP usa a participação da arma (50% ou mais vale 100). ${f.amostraPequena ? `Amostra pequena: só ${pl(f.partidasAvancadas, 'partida', 'partidas')} com estatísticas avançadas (mínimo ${f.minimoPartidas}).` : ''}`,
       h('div', { class: 'rank rank50 funcoes', role: 'list' }, ...f.ranking.map((r, i) => {
         const l = h('div', { role: 'listitem', class: i === 0 && r.nota !== null ? 'topo' : '' }, h('span', { class: 'nome' }, r.nome), barra((r.nota || 0) / 100, i === 0 ? 'bom' : ''), h('em', null, r.nota === null ? 'sem dado' : r.nota));
         dica(l, () => r.descricao);
@@ -169,70 +165,55 @@
       f.sugerida && h('div', { class: 'porque' }, h('h3', null, `Por que ${top.nome}`), h('p', { class: 'nota' }, top.descricao), h('ul', null, ...porque)));
   }
 
-  function secaoMapas(d) {
-    const MIN = 6;
-    const lin = (d.mapas || []).filter((m) => m.jogador).map((m) => {
-      const j = m.jogador, n = m.nivel || {};
-      const score = n.rating ? (j.rating - n.rating) / n.rating : 0;
-      return { mapa: m.mapa, partidas: j.partidas, win: j.vitoriaPct, kd: j.kd, adr: j.adr, rating: j.rating, ratingNivel: n.rating, score };
-    });
-    const ok = lin.filter((x) => x.partidas >= MIN).sort((a, b) => b.score - a.score), poucos = lin.filter((x) => x.partidas < MIN);
-    if (!ok.length) return card('Melhores e piores mapas', null, h('p', { class: 'vazio' }, `Nenhum mapa com ${MIN} partidas ou mais na janela.`));
-    const metade = Math.ceil(ok.length / 2), melhores = ok.slice(0, Math.min(3, metade)), piores = ok.slice(metade).slice(-3).reverse();
-    const tab = (rows, tipo) => GT.u.tabela([{ t: 'Mapa', f: (r) => r.mapa }, { t: 'Part.', f: (r) => r.partidas }, { t: 'Vitórias', f: (r) => h('span', { class: r.win >= 50 ? 'ok' : 'bad' }, fmt(r.win, 0) + '%') }, { t: 'K/D', f: (r) => fmt(r.kd, 2) },
-      { t: 'Rating', f: (r) => h('span', { class: r.score >= 0 ? 'ok' : 'bad' }, fmt(r.rating, 2)) }, { t: 'Nível', f: (r) => fmt(r.ratingNivel, 2) }], rows);
-    return h('div', { class: 'bloco-mapas' },
-      h('div', { class: 'grade2' },
-        card('Melhores mapas', `Pelo rating aproximado contra a média do nível no mesmo mapa (mínimo ${MIN} partidas no mapa).`, tab(melhores)),
-        card('Piores mapas', 'Os mapas em que o rating mais ficou abaixo do nível.', piores.length ? tab(piores) : h('p', { class: 'vazio' }, 'Poucos mapas com amostra para separar os piores.'))),
-      poucos.length > 0 && h('p', { class: 'nota' }, `Fora da lista por ter menos de ${MIN} partidas: ${poucos.map((x) => `${x.mapa} (${x.partidas})`).join(', ')}.`));
-  }
-
   function secaoDuelos(d) {
     const J = d.avancada && d.avancada.jogador, N = d.avancada && d.avancada.nivel;
-    if (!J) return card('Duelos por ordem na rodada', null, h('p', { class: 'vazio' }, 'Sem estatísticas avançadas da GC na janela.'));
+    if (!J) return recolhido('Duelos por ordem na rodada', null, h('p', { class: 'vazio' }, 'Sem estatísticas avançadas da GC na janela.'));
     const nomes = { '1': '1º duelo', '2': '2º duelo', '3': '3º duelo', '4+': '4º em diante' };
     const rows = Object.keys(nomes).map((o) => ({ o, ...J.duelos.porOrdem[o], nivel: N && N.duelos.porOrdem[o] ? N.duelos.porOrdem[o].ganhosPct : null }));
     const lado = (l) => J.duelos.primeiroPorLado[l];
-    return card('Duelos por ordem na rodada', `Ganhos e perdas de cada duelo na ordem em que acontece na rodada (1º, 2º, 3º...). O número em "Time vence" é o % de rodadas vencidas pelo time quando ele ganha ou perde aquele duelo. ${pl(J.duelos.tentativasPrimeiroDuelo, 'tentativa', 'tentativas')} de 1º duelo em ${pl(d.base.partidasAvancadas, 'partida', 'partidas')}.`,
+    return recolhido({ t: 'Duelos por ordem na rodada', selos: [['GC avançada', 'destaque']] }, `Ganhos e perdas de cada duelo na ordem em que acontece na rodada (1º, 2º, 3º...). O número em "Time vence" é o % de rodadas vencidas pelo time quando ele ganha ou perde aquele duelo. ${pl(J.duelos.tentativasPrimeiroDuelo, 'tentativa', 'tentativas')} de 1º duelo em ${pl(d.base.partidasAvancadas, 'partida', 'partidas')}.`,
       h('div', { class: 'rolar' }, GT.u.tabela([{ t: 'Duelo', f: (r) => nomes[r.o] }, { t: 'Ganhou', f: (r) => r.ganhos }, { t: 'Perdeu', f: (r) => r.perdidos },
         { t: '% ganhos', f: (r) => h('span', { class: r.nivel !== null ? (r.ganhosPct >= r.nivel ? 'ok' : 'bad') : '' }, fmt(r.ganhosPct, 0) + '%') }, { t: 'Nível', f: (r) => (r.nivel === null ? '—' : fmt(r.nivel, 0) + '%') },
         { t: 'Time vence ao ganhar', f: (r) => fmt(r.timeVenceAoGanharPct, 0) + '%' }, { t: 'Time vence ao perder', f: (r) => fmt(r.timeVenceAoPerderPct, 0) + '%' }], rows)),
-      h('p', { class: 'nota' }, `1º duelo como T: ${lado('T').ganhos} ganhos e ${lado('T').perdidos} perdidos (${fmt(lado('T').ganhosPct, 0)}%); como CT: ${lado('CT').ganhos} e ${lado('CT').perdidos} (${fmt(lado('CT').ganhosPct, 0)}%).`));
+      h('p', { class: 'nota' }, `1º duelo como TR: ${lado('T').ganhos} ganhos e ${lado('T').perdidos} perdidos (${fmt(lado('T').ganhosPct, 0)}%); como CT: ${lado('CT').ganhos} e ${lado('CT').perdidos} (${fmt(lado('CT').ganhosPct, 0)}%).`));
   }
 
   function secaoLimites(d) {
     const b = d.base, av = A();
-    return card('Limites desta análise', null, h('ul', { class: 'limites' },
+    return recolhido('Limites desta análise', null, h('ul', { class: 'limites' },
       h('li', null, `Perfil da GC (K/D, ADR, HS%, KAST, rating): ${pl(b.partidasJanela, 'partida', 'partidas')} na janela dos últimos ${av.janela.meses} meses. É a base mais sólida.`),
       h('li', null, `Detalhe avançado (entradas, clutches, trocas, mira, utilitários, economia, duelos): só ${pl(b.partidasAvancadas, 'partida', 'partidas')}. A GC guarda esse detalhe por cerca de uma semana e ele só entra nas partidas coletadas por um assinante; abaixo de 8 partidas os números são indicativos, não conclusões.`),
       h('li', null, `Demos lidas: ${pl(b.partidasDemo, 'partida', 'partidas')} (mínimo de 5 para falar de mortes cego e utilitários da demo).`),
       h('li', null, 'Todas as comparações são contra a média de jogadores do mesmo nível nas mesmas partidas, e só valem quando a amostra chega ao mínimo da métrica. O radar usa a média dos membros do grupo.'),
-      h('li', null, 'A função provável é uma estimativa por números, não define como a pessoa joga.'),
+      h('li', null, 'A função provável é uma estimativa por números, não define como o jogador joga.'),
       ...d.avisos.map((a) => h('li', { class: 'aviso' }, a.texto))));
   }
 
-  GT.registrarAba({ id: 'analise', titulo: 'Análise', ordem: 65, aceitaVazio: true, apelidos: ['analises'],
-    rotaLer(resto) { E.membro = resto.join('/') || null; },
-    rotaEscrever() { return E.membro ? '/' + E.membro : ''; },
-    render(el, ctx) {
-      const filtros = document.getElementById('filtros'); if (filtros) { filtros.replaceChildren(); filtros.hidden = true; } // janela fixa: os filtros de período e mapa não se aplicam
-      if (!A()) { el.append(h('p', { class: 'vazio' }, 'Análise não disponível nestes dados. Gere o site de novo com: npm run tracker')); return; }
-      const nicks = G.membros.map((m) => m.nick);
-      if (!nicks.includes(E.membro)) E.membro = nicks.find((n) => dadosDe(n)) || nicks[0];
-      const nick = E.membro, d = dadosDe(nick);
-      el.append(h('div', { class: 'cabeca' }, h('h1', null, 'Análise individual'),
-        h('p', { class: 'lead' }, `Pontos fortes e fracos de cada membro contra a média de quem joga no mesmo nível, nos ${janelaTexto()}. Os filtros de período e mapa não valem aqui.`)),
-        seletor(nick));
-      if (!d || !d.perfil.m6 || !d.perfil.m6.jogador) { el.append(cartaoJogador(nick, { titulo: 'h2' }), h('p', { class: 'vazio' }, `${nick} não tem partidas suficientes na janela para a análise.`)); return; }
-      el.append(cartaoJogador(nick, { titulo: 'h2' }),
-        card('Resumo', null, resumo(nick, d)),
-        ...(() => { try { return GT.estilo && ctx ? GT.estilo.secoes(nick, ctx) : []; } catch (e) { console.error(e); return [card('Estilo de jogo', null, h('p', { class: 'vazio' }, 'Erro ao calcular o estilo deste membro.'))]; } })(),
-        h('div', { class: 'grade2' },
-          card('Pontos fortes', 'O que está acima da média do mesmo nível, do que mais se destaca para o que menos.', listaPontos(d.fortes, 'forte', 'Nenhum número passou do limite acima do nível com amostra suficiente.')),
-          card('Pontos fracos', 'O que está abaixo da média do mesmo nível, do pior para o menos pior.', listaPontos(d.fracos, 'fraco', 'Nenhum número ficou abaixo do nível com amostra suficiente.'))),
-        card('A melhorar', 'Recomendações do catálogo para os pontos fracos, com o que treinar e o número a acompanhar.',
-          d.recomendacoes.length ? h('div', { class: 'recs' }, ...d.recomendacoes.map(recomendacao)) : h('p', { class: 'vazio' }, 'Sem recomendações: nenhum ponto fraco com amostra suficiente.')),
-        secaoFuncao(d), secaoMapas(d), secaoDuelos(d), secaoLimites(d));
-    } });
+  // Conteúdo da aba "Análise · últimos 6 meses" da página do jogador (#jogadores/<nick>/analise): devolve uma lista de nós. A janela é fixa e não segue o filtro.
+  const SELO_JANELA = [['últimos 6 meses · não segue o filtro', 'aviso']];
+  GT.analiseJogador = (nick, ctx) => {
+    if (!A()) return [h('p', { class: 'vazio' }, 'Análise não disponível nestes dados. Gere o site de novo com: npm run tracker')];
+    const d = dadosDe(nick);
+    if (!d || !d.perfil.m6 || !d.perfil.m6.jogador) return [card({ t: 'Análise individual', selos: SELO_JANELA }, null, h('p', { class: 'vazio' }, `${nick} não tem partidas suficientes na janela para a análise.`))];
+    let p = null;
+    try { p = GT.estilo && ctx ? GT.estilo.partes(nick, ctx) : null; } catch (e) { console.error(e); p = { vazio: card('Estilo de jogo', null, h('p', { class: 'vazio' }, 'Erro ao calcular o estilo deste jogador.')), plano: [] }; }
+    const topo = card({ t: 'Análise individual', selos: SELO_JANELA },
+      `${pl(d.base.partidasJanela, 'partida', 'partidas')} nos ${janelaTexto()}, contra a média de quem joga no mesmo nível. Os filtros de período e mapa não valem aqui.`, destaques(d));
+    const colunas = h('div', { class: 'grade2 an-cols' },
+      card('Pontos fortes', 'Acima da média do mesmo nível, do que mais se destaca para o que menos.', lista(d.fortes.map((x) => itemPonto(x, 'forte')), 3, 'Nenhum número passou do limite acima do nível com amostra suficiente.')),
+      card('O que trabalhar', 'Abaixo do nível na GC e do grupo, com o que treinar.', colunaTrabalhar(d, p && p.plano)));
+    return [topo, colunas, p && (p.estilo || p.vazio),
+      recolhido({ t: 'Radar e números contra o nível', selos: [['contra o nível', 'destaque']] }, 'Cinco números dos últimos 6 meses contra a média de quem joga no mesmo nível; o radar compara com a média dos jogadores do grupo.',
+        h('div', { class: 'an-radar' }, radar(nick, d), numerosNivel(d))),
+      p && p.perfil && recolhido({ t: 'Perfil completo contra o grupo', selos: [['contra o grupo', 'destaque']] }, 'Barra para a direita (verde) = acima da média dos jogadores; para a esquerda (vermelho) = abaixo. Em "mortes por rodada" e "acertos por abate", menos é melhor.', p.perfil),
+      p && p.avancadas && recolhido({ t: 'Momento da morte, lados e economia', selos: [['GC avançada', 'destaque']] }, null, p.avancadas),
+      secaoFuncao(d), secaoDuelos(d), secaoLimites(d)].filter(Boolean);
+  };
+  GT.temAnalise = (nick) => !!(A() && dadosDe(nick) && dadosDe(nick).perfil.m6 && dadosDe(nick).perfil.m6.jogador);
+  GT.analiseDe = dadosDe;
+
+  // #analise/<nick> (e #analises) abre #jogadores/<nick>/analise: a aba "analise" é só um apelido oculto que redireciona (a rota é lida em membros.js).
+  GT.registrarAba({ id: 'analise', titulo: 'Análise', ordem: 65, oculta: true, pai: 'jogadores', aceitaVazio: true, apelidos: ['analises'],
+    rotaLer(resto, e) { e.aba = 'jogadores'; if (GT.lerRotaJogador) GT.lerRotaJogador([resto[0] || '', 'analise']); },
+    rotaEscrever() { return ''; } });
 })();

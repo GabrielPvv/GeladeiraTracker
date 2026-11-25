@@ -1,0 +1,55 @@
+/* Comparar jogadores (#jogadores/comparar/...): cores neutras por jogador (azul e violeta do tema), sem verde/vermelho. */
+:root { --cp-a: var(--c1); --cp-b: var(--c5); }
+.cp-seletores { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.cp-sel { display: grid; gap: 4px; font-size: 12px; color: var(--mudo); min-width: 0; }
+.cp-sel select { width: 100%; min-width: 0; min-height: 36px; }
+.cp-ids { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cp-id { display: flex; align-items: center; gap: 10px; min-width: 0; padding-left: 8px; border-left: 4px solid var(--cp-a); }
+.cp-id.b { border-left-color: var(--cp-b); }
+.cp-id-t { display: grid; gap: 2px; min-width: 0; }
+.cp-nome { font-weight: 700; font-size: 18px; color: var(--fg); text-decoration: none; overflow-wrap: anywhere; }
+.cp-nome:hover { text-decoration: underline; }
+.cp-juntos { margin: 10px 0 0; color: var(--mudo); font-size: 14px; }
+.cp-juntos b { color: var(--fg); }
+.cp-caixa { overflow-x: auto; }
+.cp-cmp { table-layout: fixed; width: 100%; }
+.cp-cmp th, .cp-cmp td { white-space: normal; }
+.cp-cmp th:first-child, .cp-cmp td:first-child { width: 22%; position: static; box-shadow: none; left: auto; }
+.cp-h { color: var(--fg); overflow-wrap: anywhere; }
+.cp-h.a { text-align: right; } .cp-h.b { text-align: left; }
+.cp-sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+.cp-h.a .cp-sw { background: var(--cp-a); margin-right: 6px; } .cp-h.b .cp-sw { background: var(--cp-b); margin-left: 6px; }
+.cp-lado { padding-left: 6px; padding-right: 6px; }
+.cp-lado.b { border-left: 1px solid var(--borda); }
+.cp-in { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.cp-n { flex: none; min-width: 3em; font-variant-numeric: tabular-nums; font-weight: 400; }
+.cp-n.forte { font-weight: 800; }
+.cp-lado.a .cp-n { text-align: left; } .cp-lado.b .cp-n { text-align: right; }
+.cp-trilho { flex: 1; min-width: 0; height: 12px; display: flex; border-radius: 3px; background: color-mix(in srgb, var(--grade) 45%, transparent); overflow: hidden; }
+.cp-trilho i { display: block; height: 100%; }
+.cp-lado.a .cp-trilho { justify-content: flex-end; } .cp-lado.a .cp-trilho i { background: var(--cp-a); border-radius: 3px 0 0 3px; }
+.cp-lado.b .cp-trilho i { background: var(--cp-b); border-radius: 0 3px 3px 0; }
+.cp-mapas { width: 100%; }
+.cp-mapas th.cp-g { text-align: center; border-bottom: 2px solid var(--cp-a); overflow-wrap: anywhere; }
+.cp-mapas th.cp-g.b { border-bottom-color: var(--cp-b); }
+.cp-sub th { font-size: 11px; font-weight: 600; color: var(--mudo); }
+.cp-t { text-align: right; font-variant-numeric: tabular-nums; }
+.cp-mapa { display: inline-flex; align-items: center; gap: 8px; }
+.cp-forma { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cp-forma-i { display: grid; gap: 6px; justify-items: start; min-width: 0; padding-left: 8px; border-left: 4px solid var(--cp-a); }
+.cp-forma-i.b { border-left-color: var(--cp-b); }
+.cp-forma-i b { overflow-wrap: anywhere; }
+.cp-atalho { font-size: 13px; font-weight: 600; color: var(--acento); text-decoration: none; }
+.cp-atalho:hover { text-decoration: underline; }
+@media (max-width: 640px) {
+  .cp-seletores, .cp-ids, .cp-forma { gap: 8px; }
+  .cp-nome { font-size: 15px; }
+  .cp-id { gap: 6px; padding-left: 6px; }
+  .cp-cmp th, .cp-cmp td { padding-left: 4px; padding-right: 4px; font-size: 13px; }
+  .cp-cmp th:first-child, .cp-cmp td:first-child { width: 19%; }
+  .cp-cmp .info { display: none; }
+  .cp-in { gap: 4px; } .cp-n { min-width: 2.5em; }
+  .cp-mapas th, .cp-mapas td { padding-left: 4px; padding-right: 4px; font-size: 13px; }
+}
+.cp-barra { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.cp-link { margin: 0 0 8px; }

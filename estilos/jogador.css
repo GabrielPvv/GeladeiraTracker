@@ -1,0 +1,87 @@
+/* Página do jogador (U4a): cabeçalho com 5 números do filtro, forma, abas internas, tabela de mapas e lista de partidas. */
+.pj { display: grid; gap: 12px; min-width: 0; }
+.pj > * { min-width: 0; }
+.pj-cab { display: grid; gap: 10px; padding: 14px 16px; }
+.pj-voltar { justify-self: start; color: var(--mudo); text-decoration: none; font-size: 14px; font-weight: 600; padding: 4px 0; min-height: 32px; display: inline-flex; align-items: center; }
+.pj-voltar:hover { color: var(--fg); text-decoration: underline; }
+.pj-topo { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.pj-id { display: grid; gap: 4px; min-width: 0; }
+.pj-nome { margin: 0; font-size: 1.7rem; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; }
+.pj-sub { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: 12px; color: var(--mudo); }
+.pj-sub .pj-funcao b { color: var(--fg); font-weight: 600; }
+.pj-sub .selo { margin-left: 6px; }
+.pj-janela { margin: 0; color: var(--mudo); font-size: 14px; } .pj-janela b { color: var(--fg); font-weight: 600; }
+.pj-corpo { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 28px; align-items: end; }
+.pj-nums { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.pj-num { display: grid; gap: 2px; min-width: 0; }
+.pj-v { font-family: var(--fonte-num, var(--fonte)); font-size: 1.8rem; font-weight: 700; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.pj-forma { display: grid; gap: 4px; justify-items: start; }
+.pj-forma-in { display: flex; align-items: center; gap: 14px; min-height: 34px; }
+.pj-spark { display: inline-flex; width: 132px; height: 34px; }
+.pj-qs { display: inline-flex; gap: 4px; }
+.pj-q { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 4px; font-size: 12px; font-weight: 700; background: var(--card2); color: var(--mudo); }
+.pj-q.v { background: var(--ok); color: var(--bg); } .pj-q.d { background: var(--bad); color: var(--bg); }
+
+/* abas internas */
+.pj-abas { display: flex; gap: 4px; border-bottom: 1px solid var(--borda); overflow-x: auto; scrollbar-width: none; }
+.pj-abas::-webkit-scrollbar { display: none; }
+.pj-aba { flex: none; padding: 9px 14px; color: var(--mudo); text-decoration: none; font-weight: 500; white-space: nowrap; border-radius: 8px 8px 0 0; min-height: 40px; box-sizing: border-box; }
+.pj-aba:hover { color: var(--fg); background: var(--card2); }
+.pj-aba.ativo { color: var(--fg); font-weight: 700; box-shadow: inset 0 -2px 0 var(--acento); }
+.pj-aba-n { color: var(--mudo); font-weight: 400; font-size: .92em; }
+.pj-conteudo { display: grid; gap: 12px; min-width: 0; }
+.pj-conteudo > * { min-width: 0; }
+
+/* visão geral */
+.pj-duo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.pj-duo-i { display: grid; gap: 2px; align-content: start; }
+
+/* mapas */
+.pj-tab { min-width: 0; }
+.pj-mais-btn { display: none; margin: 0 0 8px; }
+.pj-tb th, .pj-tb td { white-space: nowrap; }
+.pj-tb td.pj-n, .pj-tb th.pj-n { text-align: right; }
+.pj-mapa { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.pj-mapa-l { display: inline-flex; align-items: center; gap: 8px; }
+.pj-mapa .selo { margin-left: 0; }
+.pj-grupo th { background: none; border-bottom: 0; text-align: center; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--mudo); padding-bottom: 2px; }
+.pj-grupo .pj-g-av .selo { margin-left: 0; margin-right: 4px; }
+.pj-grupo .pj-g-filtro { border-bottom: 1px solid var(--borda); }
+.pj-gr { font-weight: 600; text-decoration: none; }
+.pj-gr:hover { text-decoration: underline; }
+
+/* partidas */
+.pj-lista { min-width: 0; }
+.pj-linha.sem { cursor: default; }
+.pj-linha.sem:hover { background: none; }
+.pj-nums-l { display: inline-flex; flex-wrap: wrap; gap: 4px 16px; color: var(--mudo); font-variant-numeric: tabular-nums; font-size: 14px; }
+.pj-nums-l b { color: var(--fg); font-weight: 600; }
+.pj-mais-p { margin-top: 10px; }
+
+@media (max-width: 640px) {
+  .pj-cab { padding: 12px; }
+  .pj-nome { font-size: 1.4rem; }
+  .pj-corpo { grid-template-columns: minmax(0, 1fr); }
+  .pj-nums { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 8px; }
+  .pj-v { font-size: 1.5rem; }
+  .pj-duo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pj-duo-i:first-child { grid-column: 1 / -1; }
+  .pj-mais-btn { display: inline-flex; align-items: center; }
+  .pj-tab:not(.aberta) .pj-mais { display: none; }
+  .pj-tab.aberta .pj-grupo { display: none; }
+  .pj-tab:not(.aberta) .pj-grupo { display: none; }
+  .pj-tab:not(.aberta) .pj-tb td, .pj-tab:not(.aberta) .pj-tb th { padding-left: 6px; padding-right: 6px; }
+  .pj-mapa-l span:last-child { overflow: hidden; text-overflow: ellipsis; }
+  .pj-tab:not(.aberta) .pj-tb th, .pj-tab:not(.aberta) .pj-tb td { white-space: normal; }
+  .pj-linha .pl-chips.pj-nums-l { grid-area: chips; }
+}
+
+/* Forma com tendência (item 8) e contra nível do adversário (item 9) */
+.pj-tends { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.pj-tend { min-width: 0; }
+.pj-seta { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pj-seta.mudo { font-weight: 500; }
+@media (max-width: 640px) { .pj-tends { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .pj-tends .pj-duo-i:first-child { grid-column: auto; } }
+
+.pj-acoes { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; }

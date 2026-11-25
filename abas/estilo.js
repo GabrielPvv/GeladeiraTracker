@@ -1,14 +1,14 @@
-// Estilo de jogo de cada membro (seções da aba Análise e o "Mapa de estilos" da Home).
+// Estilo de jogo de cada membro (partes da aba Análise da página do jogador e o "Mapa de estilos" da lista de Jogadores).
 // Base: os números da GC que existem em TODAS as partidas (abates, mortes, dano, KAST, primeiro abate, assistência de flash,
 // acertos e acertos na cabeça, bombas, desarmes, 3K+), somados e divididos no fim. Referência: a média dos membros (mesma conta).
 // Onde houver estatísticas avançadas (G.analise), entram também momento da morte, mortes sem troca, lados T/CT e economia.
-// Exporta GT.estilo = { secoes(nick, ctx), mapa(ctx, destaque) }.
+// Exporta GT.estilo = { partes(nick, ctx), mapa(ctx, destaque), dados, quad }.
 (function () {
   'use strict';
   const GT = window.GT, G = GT.G;
   const { h, sv, pl, card, avatar, dica, infoIcone, grafico, linkMembro } = GT.u;
 
-  const f2 = (x) => (Number.isFinite(x) ? x.toFixed(2) : '—');
+  const f2 = (x) => (Number.isFinite(x) ? GT.u.num(x, 2) : '—');
   const MIN_ROD = 150; // rodadas para um membro entrar nas comparações
   const desde = () => (G.analise && G.analise.janela ? G.analise.janela.desde : null);
   const partidasJanela = (ctx) => { const d = desde(); return d ? ctx.D.partidas.filter((m) => m.d >= d) : ctx.D.partidas; };
@@ -86,7 +86,7 @@
           const g = sv('g', { class: 'est-pt' + (eu ? ' eu' : ''), tabindex: '0' },
             sv('circle', { cx, cy, r: eu ? 11 : 8, class: 'est-bola', fill: 'var(--' + ((avatar(n).className.match(/av\d/) || ['av0'])[0]) + ')' }),
             sv('text', { x: cx, y: ly, 'text-anchor': 'middle', class: 'forte est-nome' }, n));
-          dica(g, () => `${n}: ${quad(s).t} · exposição ${Math.round(s.exposicao)}, impacto ${Math.round(s.impacto)} (contra o ${s.refImpacto === 'nível' ? 'próprio nível' : 'grupo'})${s.funcao ? ' · função ' + s.funcao : ''} · 1º abate ${s.fkR.toFixed(3)}/rod., mortes ${s.dpr.toFixed(2)}/rod.`);
+          dica(g, () => `${n}: ${quad(s).t} · exposição ${Math.round(s.exposicao)}, impacto ${Math.round(s.impacto)} (contra o ${s.refImpacto === 'nível' ? 'próprio nível' : 'grupo'})${s.funcao ? ' · função ' + s.funcao : ''} · 1º abate ${GT.u.num(s.fkR, 3)}/rod., mortes ${GT.u.num(s.dpr, 2)}/rod.`);
           return g;
         }); })());
       el.replaceChildren(svg);
@@ -95,19 +95,19 @@
 
   // ---------- perfil completo contra o grupo ----------
   const ITENS = [
-    { k: 'kd', rot: 'K/D', f: (x) => x.toFixed(2), grupo: 'Duelo' },
-    { k: 'adr', rot: 'ADR', f: (x) => x.toFixed(1), grupo: 'Duelo' },
+    { k: 'kd', rot: 'K/D', f: (x) => GT.u.num(x, 2), grupo: 'Duelo' },
+    { k: 'adr', rot: 'ADR', f: (x) => GT.u.num(x, 1), grupo: 'Duelo' },
     { k: 'kastP', rot: 'KAST', f: (x) => Math.round(x * 100) + '%', grupo: 'Duelo' },
-    { k: 'mkR', rot: 'Rodadas com 3+ abates', f: (x) => (x * 100).toFixed(1) + '%', grupo: 'Duelo', info: 'Parte das rodadas em que fez 3 abates ou mais.' },
-    { k: 'fkR', rot: '1º abate por rodada', f: (x) => x.toFixed(3), grupo: 'Abertura' },
-    { k: 'dpr', rot: 'Mortes por rodada', f: (x) => x.toFixed(2), grupo: 'Abertura', menor: true },
+    { k: 'mkR', rot: 'Rodadas com 3+ abates', f: (x) => GT.u.num(x * 100, 1) + '%', grupo: 'Duelo', info: 'Parte das rodadas em que fez 3 abates ou mais.' },
+    { k: 'fkR', rot: '1º abate por rodada', f: (x) => GT.u.num(x, 3), grupo: 'Abertura' },
+    { k: 'dpr', rot: 'Mortes por rodada', f: (x) => GT.u.num(x, 2), grupo: 'Abertura', menor: true },
     { k: 'hsP', rot: 'Abates na cabeça', f: (x) => Math.round(x * 100) + '%', grupo: 'Mira' },
     { k: 'headHit', rot: 'Acertos na cabeça', f: (x) => Math.round(x * 100) + '%', grupo: 'Mira', info: 'De todos os tiros que acertam, quantos pegam na cabeça. Baixo = mira na altura do peito.' },
-    { k: 'hitK', rot: 'Acertos por abate', f: (x) => x.toFixed(1), grupo: 'Mira', menor: true, info: 'Quantos tiros que acertam ele precisa, em média, para cada abate. Alto = demora para finalizar (spray, tiro em movimento).' },
-    { k: 'fa100', rot: 'Assist. de flash / 100 rod.', f: (x) => x.toFixed(1), grupo: 'Time' },
-    { k: 'apr', rot: 'Assistências por rodada', f: (x) => x.toFixed(2), grupo: 'Time' },
-    { k: 'pl100', rot: 'Bombas plantadas / 100 rod.', f: (x) => x.toFixed(1), grupo: 'Objetivo' },
-    { k: 'df100', rot: 'Desarmes / 100 rod.', f: (x) => x.toFixed(1), grupo: 'Objetivo' },
+    { k: 'hitK', rot: 'Acertos por abate', f: (x) => GT.u.num(x, 1), grupo: 'Mira', menor: true, info: 'Quantos tiros que acertam o membro precisa, em média, para cada abate. Alto = demora para finalizar (spray, tiro em movimento).' },
+    { k: 'fa100', rot: 'Assist. de flash / 100 rod.', f: (x) => GT.u.num(x, 1), grupo: 'Time' },
+    { k: 'apr', rot: 'Assistências por rodada', f: (x) => GT.u.num(x, 2), grupo: 'Time' },
+    { k: 'pl100', rot: 'Bombas plantadas / 100 rod.', f: (x) => GT.u.num(x, 1), grupo: 'Objetivo' },
+    { k: 'df100', rot: 'Desarmes / 100 rod.', f: (x) => GT.u.num(x, 1), grupo: 'Objetivo' },
   ];
   function perfil(s, G0) {
     const linha = (it) => {
@@ -130,7 +130,7 @@
     const a = G.analise && G.analise.membros && G.analise.membros[nick], J = a && a.avancada && a.avancada.jogador, N = a && a.avancada && a.avancada.nivel;
     if (!J || !J.mortes || !J.lados) return null;
     const pctTxt = (x) => (x === null || x === undefined ? '—' : Math.round(x) + '%');
-    const lado = (id, rot) => { const l = J.lados[id], ln = N && N.lados ? N.lados[id] : null; return h('div', { class: 'rs-kpi', estilo: `--k:${id === 't' ? 'var(--c4)' : 'var(--c1)'}` },
+    const lado = (id, rot) => { const l = J.lados[id], ln = N && N.lados ? N.lados[id] : null; return h('div', { class: 'rs-kpi', estilo: `--k:${id === 't' ? 'var(--tr)' : 'var(--ct)'}` },
       h('span', { class: 'rot' }, rot), h('b', { class: 'rs-kpi-v' }, f2(l.kd)), h('small', { class: 'mudo' }, `K/D · ${pctTxt(l.vitoriaPct)} das rodadas ganhas${ln ? ` · nível ${f2(ln.kd)}` : ''}`)); };
     const eco = J.economia || {};
     const ECO = [['pistol', 'Pistol'], ['eco', 'Eco'], ['force', 'Force'], ['full', 'Compra cheia']];
@@ -144,7 +144,7 @@
         k('Mortes sem troca', morte.semTrocaPct, Nm && Nm.semTrocaPct, true, 'var(--c4)', 'Parte das mortes em que ninguém do time matou o assassino logo depois. Alto = morre longe do time.'),
         k('Segundo da rodada em que morre', morte.segundoMediana, Nm && Nm.segundoMediana, false, 'var(--c6)', 'Mediana do momento da morte. Baixo = morre cedo.'),
         k('Clutches ganhos', J.clutch ? J.clutch.pct : null, N && N.clutch ? N.clutch.pct : null, false, 'var(--c2)', 'Rodadas vencidas sozinho contra 1 ou mais.')),
-      h('div', { class: 'rs-kpis' }, lado('t', 'Lado T'), lado('ct', 'Lado CT'),
+      h('div', { class: 'rs-kpis' }, lado('t', 'Lado TR'), lado('ct', 'Lado CT'),
         ...ECO.filter(([id]) => eco[id] && eco[id].rodadas).map(([id, rot]) => h('div', { class: 'rs-kpi', estilo: '--k:var(--c5)' }, h('span', { class: 'rot' }, rot), h('b', { class: 'rs-kpi-v' }, f2(eco[id].kd)), h('small', { class: 'mudo' }, `K/D · ${pl(eco[id].rodadas, 'rodada', 'rodadas')} · ${pctTxt(eco[id].vitoriaPct)} ganhas`)))),
       h('p', { class: 'nota' }, `Estatísticas avançadas da GC (${pl(J.partidas, 'partida', 'partidas')}). "Nível" é a média de quem jogou no mesmo nível nas mesmas partidas.`));
   }
@@ -163,11 +163,11 @@
       `Só ${Math.round(s.headHit * 100)}% dos acertos pegam na cabeça (grupo ${Math.round(G0.headHit * 100)}%).`,
       ['10 min por dia de crosshair placement (mapa de prefire ou Aim Botz), mira sempre na altura da cabeça ao andar.', 'Em DM, só tiro na cabeça (modo HS only).'], `${Math.round(G0.headHit * 100)}% dos acertos na cabeça`);
     if (rel('hitK', true) < -0.12) add(-rel('hitK', true), 'Finalizar duelos com menos tiros',
-      `Precisa de ${s.hitK.toFixed(1)} acertos por abate (grupo ${G0.hitK.toFixed(1)}).`,
-      ['Parar antes de atirar (counter-strafe) e treinar tap e burst de 2 ou 3 tiros.', 'Spray control de AK e M4 nos primeiros 10 tiros.'], `${G0.hitK.toFixed(1)} acertos por abate`);
+      `Precisa de ${GT.u.num(s.hitK, 1)} acertos por abate (grupo ${GT.u.num(G0.hitK, 1)}).`,
+      ['Parar antes de atirar (counter-strafe) e treinar tap e burst de 2 ou 3 tiros.', 'Spray control de AK e M4 nos primeiros 10 tiros.'], `${GT.u.num(G0.hitK, 1)} acertos por abate`);
     if (rel('fa100') < -0.3) add(-rel('fa100') * 0.7, 'Usar mais flash para o time',
-      `${s.fa100.toFixed(1)} assistências de flash por 100 rodadas (grupo ${G0.fa100.toFixed(1)}).`,
-      ['Aprender 2 pop-flashes por bomb nos mapas mais jogados.', 'Combinar com quem abre: flash antes do peek dele.'], `${G0.fa100.toFixed(1)} por 100 rodadas`);
+      `${GT.u.num(s.fa100, 1)} assistências de flash por 100 rodadas (grupo ${GT.u.num(G0.fa100, 1)}).`,
+      ['Aprender 2 pop-flashes por bomb nos mapas mais jogados.', 'Combinar com quem abre: flash antes do peek do membro.'], `${GT.u.num(G0.fa100, 1)} por 100 rodadas`);
     if (s.exposicao >= 55 && s.impacto < 48) add(0.25 + (s.exposicao - 50) / 100, 'Abrir rodada com apoio',
       `Exposição ${Math.round(s.exposicao)} (acima do grupo) com impacto ${Math.round(s.impacto)} (abaixo do próprio nível).`,
       ['Entrar só com flash ou smoke de apoio.', 'Combinar a dupla de entrada: quem abre e quem troca.'], 'impacto 50 ou mais no mapa de estilos');
@@ -175,8 +175,8 @@
       `Exposição ${Math.round(s.exposicao)} e impacto ${Math.round(s.impacto)} (abaixo do próprio nível).`,
       ['Pegar posições de informação e falar no rádio.', 'Jogar perto da dupla principal para trocar e ganhar abates.'], 'KAST e ADR na média do grupo');
     if (rel('mkR') < -0.25) add(-rel('mkR') * 0.6, 'Virar mais rodadas com multiabate',
-      `${(s.mkR * 100).toFixed(1)}% das rodadas com 3 ou mais abates (grupo ${(G0.mkR * 100).toFixed(1)}%).`,
-      ['Escolher ângulos com rota de saída e crossfire com um colega.', 'Depois do primeiro abate, segurar o ângulo para o próximo em vez de avançar sozinho.'], `${(G0.mkR * 100).toFixed(1)}% das rodadas`);
+      `${GT.u.num(s.mkR * 100, 1)}% das rodadas com 3 ou mais abates (grupo ${GT.u.num(G0.mkR * 100, 1)}%).`,
+      ['Escolher ângulos com rota de saída e crossfire com um colega.', 'Depois do primeiro abate, segurar o ângulo para o próximo em vez de avançar sozinho.'], `${GT.u.num(G0.mkR * 100, 1)}% das rodadas`);
     if (J && J.mortes && N && N.mortes) {
       if (J.mortes.semTrocaPct - N.mortes.semTrocaPct > 8) add((J.mortes.semTrocaPct - N.mortes.semTrocaPct) / 50, 'Morrer perto do time (com troca)',
         `${Math.round(J.mortes.semTrocaPct)}% das mortes ficam sem troca (nível ${Math.round(N.mortes.semTrocaPct)}%).`,
@@ -187,69 +187,43 @@
     }
     if (J && J.lados && J.lados.t && J.lados.ct) {
       const t = J.lados.t.kd, ct = J.lados.ct.kd;
-      if (Number.isFinite(t) && Number.isFinite(ct) && Math.max(t, ct) > 0 && Math.abs(t - ct) / Math.max(t, ct) > 0.2) { const fraco = t < ct ? 'T' : 'CT';
-        add(Math.abs(t - ct) / Math.max(t, ct), `Melhorar o lado ${fraco}`, `K/D ${t.toFixed(2)} de T e ${ct.toFixed(2)} de CT.`,
-          fraco === 'T' ? ['Treinar as execuções de bomb com o time (smoke, flash, entrada).', 'Revisar demos de rodadas de T perdidas.'] : ['Fixar uma posição de CT por mapa e aprender o retake dela.', 'Treinar segurar ângulo com utilitário de atraso (molotov, HE).'], `K/D de ${fraco} perto do outro lado`); }
+      if (Number.isFinite(t) && Number.isFinite(ct) && Math.max(t, ct) > 0 && Math.abs(t - ct) / Math.max(t, ct) > 0.2) { const menor = t < ct ? 'T' : 'CT';
+        add(Math.abs(t - ct) / Math.max(t, ct), `Trabalhar o lado ${GT.u.nomeLado(menor)}`, `K/D ${GT.u.num(t, 2)} de TR e ${GT.u.num(ct, 2)} de CT.`,
+          menor === 'T' ? ['Treinar as execuções de bomb com o time (smoke, flash, entrada).', 'Revisar demos de rodadas de TR perdidas.'] : ['Fixar uma posição de CT por mapa e aprender o retake dela.', 'Treinar segurar ângulo com utilitário de atraso (molotov, HE).'], `K/D de ${GT.u.nomeLado(menor)} perto do outro lado`); }
     }
     return out.sort((x, y) => y.peso - x.peso).slice(0, 4);
   }
 
-  // ---------- mapa a mapa ----------
-  function mapaAMapa(s) {
-    const por = new Map();
-    for (const l of s.linhas) { if (!por.has(l.mp)) por.set(l.mp, []); por.get(l.mp).push(l); }
-    const linhas = [...por].map(([mp, l]) => ({ mp, ...somar(l) })).filter((x) => x.partidas >= 3).sort((a, b) => b.partidas - a.partidas);
-    if (!linhas.length) return h('p', { class: 'vazio' }, 'Menos de 3 partidas em cada mapa.');
-    const cols = [['partidas', 'Part.', (x) => x, null], ['wr', 'Win rate', (x) => Math.round(x * 100) + '%', 'wr'], ['kd', 'K/D', (x) => x.toFixed(2), 'kd'], ['adr', 'ADR', (x) => x.toFixed(1), 'adr'],
-      ['fkR', '1º abate/rod.', (x) => x.toFixed(3), 'fkR'], ['kastP', 'KAST', (x) => Math.round(x * 100) + '%', 'kastP'], ['headHit', 'Acerto cabeça', (x) => Math.round(x * 100) + '%', 'headHit']];
-    const cel = (l, c) => { if (!c[3]) return h('td', null, c[2](l[c[0]])); const ref = s[c[3]], d = ref ? (l[c[0]] - ref) / ref : 0, a = Math.min(40, Math.round(Math.abs(d) * 120));
-      return h('td', { class: 'est-cel', estilo: `--calor:${a}%;--cor:${d >= 0 ? 'var(--ok)' : 'var(--bad)'}` }, c[2](l[c[0]])); };
-    const melhor = [...linhas].sort((a, b) => b.wr - a.wr || b.adr - a.adr)[0], pior = [...linhas].sort((a, b) => a.wr - b.wr || a.adr - b.adr)[0];
-    return [h('div', { class: 'rs-destaques' },
-      h('div', { class: 'rs-dest forte' }, h('span', { class: 'rot' }, 'Melhor mapa'), h('b', null, melhor.mp), h('small', null, `${Math.round(melhor.wr * 100)}% de vitórias · K/D ${f2(melhor.kd)} · ADR ${melhor.adr.toFixed(1)}`)),
-      linhas.length > 1 && h('div', { class: 'rs-dest fraco' }, h('span', { class: 'rot' }, 'Mapa a trabalhar'), h('b', null, pior.mp), h('small', null, `${Math.round(pior.wr * 100)}% de vitórias · K/D ${f2(pior.kd)} · ADR ${pior.adr.toFixed(1)}`))),
-      h('div', { class: 'rolar' }, h('table', { class: 'est-tab' }, h('thead', null, h('tr', null, h('th', null, 'Mapa'), ...cols.map((c) => h('th', null, c[1])))),
-        h('tbody', null, ...linhas.map((l) => h('tr', null, h('td', null, h('b', null, l.mp)), ...cols.map((c) => cel(l, c))))))),
-      h('p', { class: 'nota' }, 'Verde: acima da média do próprio membro em todos os mapas; vermelho: abaixo. Mapas com 3 partidas ou mais.')];
-  }
-
-  function secoes(nick, ctx) {
+  // Partes da aba Análise da página do jogador (montadas em analise.js): o card de estilo (veredito + mapa de estilos com o jogador destacado),
+  // os itens do plano contra o grupo, o perfil completo e o bloco de momento da morte, lados e economia.
+  function partes(nick, ctx) {
     const D = dadosEstilo(ctx), s = D.membros.get(nick);
-    if (!s || !s.ok) return [card('Estilo de jogo', null, h('p', { class: 'vazio' }, `${nick} tem menos de ${MIN_ROD} rodadas nas partidas da Geladeira da janela; sem estilo calculado.`))];
-    const Q = quad(s), P = plano(nick, s, D.grupo), av = avancadas(nick);
+    if (!s || !s.ok) return { vazio: card('Estilo de jogo', null, h('p', { class: 'vazio' }, `${nick} tem menos de ${MIN_ROD} rodadas nas partidas da Geladeira da janela; sem estilo calculado.`)), plano: [] };
+    const Q = quad(s), P = plano(nick, s, D.grupo);
     const janela = desde() ? `desde ${GT.u.dataBR(desde())}` : 'no ano';
-    return [
-      card('Estilo de jogo: agressivo ou paciente?', `Exposição: 1º abate e mortes por rodada nas partidas da Geladeira ${janela} (${pl(s.partidas, 'partida', 'partidas')}), contra a média do grupo. Impacto: ADR e KAST contra a média do próprio nível na GC (perfil dos últimos 6 meses). 50 = na média.`,
-        h('div', { class: 'est-topo' },
-          h('div', { class: 'est-veredito' },
-            h('span', { class: 'rot' }, 'Estilo'), h('b', { class: 'est-tit' }, Q.t), h('p', null, Q.d), notaFuncao(s) && h('p', { class: 'est-funcao' }, notaFuncao(s)),
-            s.impAdr && h('p', { class: 'nota' }, `ADR ${s.impAdr[0].toFixed(1)} contra ${s.impAdr[1].toFixed(1)} do nível · KAST ${s.impKast[0].toFixed(1)}% contra ${s.impKast[1].toFixed(1)}%.`),
-            h('div', { class: 'est-medidores' },
-              medidor('Exposição', s.exposicao, 'quanto se expõe: 1º abate e mortes por rodada', 'var(--c4)'),
-              medidor('Impacto', s.impacto, s.refImpacto === 'nível' ? 'ADR e KAST contra a média de quem joga no mesmo nível na GC' : 'ADR e KAST contra a média do grupo (sem perfil de nível)', 'var(--c1)'))),
-          mapaEstilos(ctx, nick))),
-      card('O que trabalhar', 'Prioridades em ordem, a partir dos números do membro contra o grupo (e contra o nível, quando há estatística avançada).',
-        P.length ? h('ol', { class: 'est-plano' }, ...P.map((p, i) => h('li', { class: 'est-item' },
-          h('span', { class: 'est-num' }, i + 1),
-          h('div', null, h('b', null, p.titulo), h('p', { class: 'mudo' }, p.porque),
-            h('ul', null, ...p.treino.map((t) => h('li', null, t))), h('small', { class: 'est-meta' }, 'Meta: ', h('b', null, p.meta))))))
-          : h('p', { class: 'vazio' }, 'Nenhum número bem abaixo do grupo. Manter o que está funcionando.')),
-      card('Perfil completo contra o grupo', 'Barra para a direita (verde) = melhor que a média dos membros; para a esquerda (vermelho) = pior. Em "mortes por rodada" e "acertos por abate", menos é melhor.', perfil(s, D.grupo)),
-      av && card('Momento da morte, lados e economia', null, av),
-      card('Mapa a mapa', null, ...[].concat(mapaAMapa(s))),
-    ].filter(Boolean);
+    const estilo = card({ t: 'Estilo de jogo: agressivo ou paciente?', selos: [['últimos 6 meses', 'destaque']] }, `Exposição: 1º abate e mortes por rodada nas partidas da Geladeira ${janela} (${pl(s.partidas, 'partida', 'partidas')}), contra a média do grupo. Impacto: ADR e KAST contra a média do próprio nível na GC. 50 = na média.`,
+      h('div', { class: 'est-topo' },
+        h('div', { class: 'est-veredito' },
+          h('span', { class: 'rot' }, 'Estilo'), h('b', { class: 'est-tit' }, Q.t), h('p', null, Q.d), notaFuncao(s) && h('p', { class: 'est-funcao' }, notaFuncao(s)),
+          s.impAdr && h('p', { class: 'nota' }, `ADR ${GT.u.num(s.impAdr[0], 1)} contra ${GT.u.num(s.impAdr[1], 1)} do nível · KAST ${GT.u.num(s.impKast[0], 1)}% contra ${GT.u.num(s.impKast[1], 1)}%.`),
+          h('div', { class: 'est-medidores' },
+            medidor('Exposição', s.exposicao, 'quanto se expõe: 1º abate e mortes por rodada', 'var(--c4)'),
+            medidor('Impacto', s.impacto, s.refImpacto === 'nível' ? 'ADR e KAST contra a média de quem joga no mesmo nível na GC' : 'ADR e KAST contra a média do grupo (sem perfil de nível)', 'var(--c1)'))),
+        mapaEstilos(ctx, nick)));
+    return { estilo, plano: P, perfil: perfil(s, D.grupo), avancadas: avancadas(nick) };
   }
   const medidor = (rot, v, info, cor) => h('div', { class: 'est-med', estilo: `--k:${cor}` }, h('span', { class: 'rot' }, rot, infoIcone(info)),
     h('span', { class: 'est-med-trilho' }, h('i', { estilo: `width:${Math.round(v)}%` }), h('em', { estilo: 'left:50%' })), h('b', null, Math.round(v)));
 
-  GT.estilo = { secoes, mapa: mapaEstilos, dados: dadosEstilo, quad };
+  GT.estilo = { partes, mapa: mapaEstilos, dados: dadosEstilo, quad };
 
-  // Home: mapa de estilos de todo o grupo.
-  GT.registrarBloco({ aba: 'home', id: 'estilos', ordem: 45, render(el, ctx) {
+  // Mapa de estilos de todo o grupo, na lista de Jogadores (bloco da aba "membros", que é o id interno da lista), recolhido (GT.recolhidoLista, de membros.js).
+  GT.registrarBloco({ aba: 'membros', id: 'estilos', ordem: 45, render(el, ctx) {
     const D = dadosEstilo(ctx);
     const ok = [...D.membros].filter(([, s]) => s.ok);
     if (ok.length < 2) return;
-    el.append(card('Mapa de estilos', `Quem joga agressivo e quem joga paciente, e quem devolve impacto. Partidas da Geladeira ${desde() ? 'desde ' + GT.u.dataBR(desde()) : 'do ano'}; 50 é a média do grupo. Clique num membro na Análise para ver o que trabalhar.`,
+    el.append(GT.recolhidoLista({ t: 'Mapa de estilos', selos: [['últimos 6 meses', 'destaque']] },
+      h('p', { class: 'nota' }, `Quem joga agressivo e quem joga paciente, e quem devolve impacto. Partidas da Geladeira ${desde() ? 'desde ' + GT.u.dataBR(desde()) : 'do ano'}; 50 é a média do grupo. Clique num jogador para ver o que trabalhar.`),
       mapaEstilos(ctx, null),
       h('div', { class: 'chips-m' }, ...ok.sort((a, b) => b[1].exposicao - a[1].exposicao).map(([n, s]) => h('a', { class: 'chip-m', href: (GT.linkAnalise ? GT.linkAnalise(n) : linkMembro(n)) }, avatar(n, 18), h('span', { class: 'chip-m-nome' }, `${n} · ${quad(s).t.toLowerCase()}`))))));
   } });

@@ -1,16 +1,9 @@
 /* Placar do grupo e destaque da semana (abas\visao-topo.js) */
-.placar { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px 32px; align-items: center; }
-.placar-num { display: grid; gap: 4px; }
-.placar-valor { display: flex; align-items: baseline; gap: 14px; font-size: clamp(2.6rem, 9vw, 4.4rem); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
-.placar-x { color: var(--mudo); font-weight: 400; font-size: .6em; }
-.placar-lado { display: grid; gap: 6px; min-width: 0; }
-.placar-graf { width: 100%; min-height: 64px; }
-.placar-graf svg { width: 100%; height: 64px; display: block; }
 .premios { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 8px; }
 .premio { display: flex; gap: 10px; background: var(--card2); border: 1px solid var(--borda); border-radius: var(--raio); padding: 12px; min-width: 0; }
-.premio-ico { font-size: 1.5rem; line-height: 1.2; }
+.premio { border-left: 3px solid var(--acento); } .premio.adr { border-left-color: var(--c5); } .premio.kd { border-left-color: var(--acento); } .premio.seq { border-left-color: var(--ok); }
 .premio-corpo { display: grid; gap: 4px; min-width: 0; }
 .premio-quem { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--fg); text-decoration: none; }
 .premio-valor { font-size: 1.6rem; font-weight: 700; color: var(--acento); }
-@media (max-width: 560px) { .placar { grid-template-columns: minmax(0, 1fr); } }
-@media (prefers-reduced-motion: reduce) { .placar, .premio { animation: none; } }
+
+@media (prefers-reduced-motion: reduce) { .premio { animation: none; } }

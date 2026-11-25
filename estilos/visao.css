@@ -9,7 +9,7 @@
 
 /* sequências */
 .seqs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
-.seq { background: var(--card2); border-radius: 10px; padding: 12px; display: grid; gap: 2px; }
+.seq { background: var(--card2); border-radius: 8px; padding: 12px; display: grid; gap: 2px; }
 .seq b { font-size: 1.9rem; font-variant-numeric: tabular-nums; line-height: 1.1; }
 .seq small { color: var(--mudo); }
 

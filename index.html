@@ -18,15 +18,21 @@
 <link rel="stylesheet" href="estilos/base.css">
 <link rel="stylesheet" href="estilos/adversarios.css">
 <link rel="stylesheet" href="estilos/analise.css">
+<link rel="stylesheet" href="estilos/combate.css">
+<link rel="stylesheet" href="estilos/comparar.css">
 <link rel="stylesheet" href="estilos/estilo.css">
 <link rel="stylesheet" href="estilos/granadas.css">
 <link rel="stylesheet" href="estilos/home.css">
+<link rel="stylesheet" href="estilos/inicio.css">
+<link rel="stylesheet" href="estilos/jogador.css">
 <link rel="stylesheet" href="estilos/lines.css">
 <link rel="stylesheet" href="estilos/mapas.css">
 <link rel="stylesheet" href="estilos/membros.css">
 <link rel="stylesheet" href="estilos/meses.css">
 <link rel="stylesheet" href="estilos/partidas.css">
 <link rel="stylesheet" href="estilos/plano.css">
+<link rel="stylesheet" href="estilos/time-extras.css">
+<link rel="stylesheet" href="estilos/time.css">
 <link rel="stylesheet" href="estilos/visao-topo.css">
 <link rel="stylesheet" href="estilos/visao.css">
 <link rel="stylesheet" href="estilos/visual.css">
@@ -35,7 +41,7 @@
 <body>
 <header class="topo">
   <div class="topo-linha">
-    <a class="marca" href="#home" aria-label="Geladeira Tracker, visão geral"><svg class="marca-logo" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true" focusable="false"><ellipse cx="16" cy="30.6" rx="9.5" ry="1" fill="currentColor" opacity=".18"/><rect x="8.5" y="28" width="3" height="2.6" rx="1" fill="currentColor"/><rect x="20.5" y="28" width="3" height="2.6" rx="1" fill="currentColor"/><rect x="6" y="2" width="20" height="26.4" rx="6.5" fill="var(--acento)" fill-opacity=".28" stroke="currentColor" stroke-width="2"/><path d="M6.6 10.4 L25.4 9.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="21.2" y="4.4" width="2" height="3.8" rx="1" fill="currentColor"/><rect x="21.2" y="12.6" width="2.2" height="8.4" rx="1.1" fill="currentColor"/><rect x="21.9" y="13.6" width=".7" height="6.4" rx=".35" fill="var(--acento)"/><path d="M9.6 22.4 q1.8 -1.6 3.4 .2 q-1.2 2 -3.2 1.4 z" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity=".7"/><path d="M6.8 24.8 q2.4 -1 2.2 2.8 q-1.4 .4 -2.4 -.4 z" fill="#b4571f"/><circle cx="23.6" cy="25.4" r="1.1" fill="#b4571f"/><circle cx="22.4" cy="26.6" r=".7" fill="#b4571f" opacity=".8"/><rect x="10.4" y="13" width="4" height="3.6" rx=".8" fill="var(--acento)" stroke="currentColor" stroke-width=".9" transform="rotate(-21 12.4 14.8)"/></svg>Geladeira Tracker</a>
+    <a class="marca" href="#inicio" aria-label="Geladeira Tracker, início"><svg class="marca-logo" viewBox="0 0 32 32" width="30" height="30" aria-hidden="true" focusable="false"><ellipse cx="16" cy="30.6" rx="9.5" ry="1" fill="currentColor" opacity=".18"/><rect x="8.5" y="28" width="3" height="2.6" rx="1" fill="currentColor"/><rect x="20.5" y="28" width="3" height="2.6" rx="1" fill="currentColor"/><rect x="6" y="2" width="20" height="26.4" rx="6.5" fill="var(--acento)" fill-opacity=".28" stroke="currentColor" stroke-width="2"/><path d="M6.6 10.4 L25.4 9.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="21.2" y="4.4" width="2" height="3.8" rx="1" fill="currentColor"/><rect x="21.2" y="12.6" width="2.2" height="8.4" rx="1.1" fill="currentColor"/><rect x="21.9" y="13.6" width=".7" height="6.4" rx=".35" fill="var(--acento)"/><path d="M9.6 22.4 q1.8 -1.6 3.4 .2 q-1.2 2 -3.2 1.4 z" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity=".7"/><path d="M6.8 24.8 q2.4 -1 2.2 2.8 q-1.4 .4 -2.4 -.4 z" fill="#b4571f"/><circle cx="23.6" cy="25.4" r="1.1" fill="#b4571f"/><circle cx="22.4" cy="26.6" r=".7" fill="#b4571f" opacity=".8"/><rect x="10.4" y="13" width="4" height="3.6" rx=".8" fill="var(--acento)" stroke="currentColor" stroke-width=".9" transform="rotate(-21 12.4 14.8)"/></svg>Geladeira Tracker</a>
     <div class="topo-acoes">
       <label class="rot-ano"><span class="rot-txt">Ano</span> <select id="sel-ano" aria-label="Ano"></select></label>
       <button type="button" id="btn-link" class="btn" title="Copiar o link desta aba (com ano e filtros)">Copiar link</button>
@@ -45,7 +51,7 @@
   <div class="topo-linha topo-nav">
     <nav id="abas" class="abas" aria-label="Seções"></nav>
     <div class="busca">
-      <input id="busca" type="search" placeholder="Buscar membro ou adversário" autocomplete="off" aria-label="Buscar membro ou adversário" aria-controls="busca-res">
+      <input id="busca" type="search" placeholder="Nick, mapa ou data" autocomplete="off" aria-label="Buscar membro, adversário, mapa ou data" aria-controls="busca-res">
       <div id="busca-res" class="busca-res" hidden role="listbox"></div>
     </div>
   </div>
@@ -63,19 +69,24 @@
 <script src="nucleo.js"></script>
 <script src="abas/adversarios.js"></script>
 <script src="abas/analise.js"></script>
+<script src="abas/combate.js"></script>
+<script src="abas/comparar.js"></script>
 <script src="abas/estilo.js"></script>
 <script src="abas/granadas-dados.js"></script>
 <script src="abas/granadas-grupo.js"></script>
 <script src="abas/granadas-pros.js"></script>
 <script src="abas/granadas.js"></script>
 <script src="abas/home.js"></script>
+<script src="abas/inicio.js"></script>
+<script src="abas/jogador.js"></script>
 <script src="abas/lines.js"></script>
 <script src="abas/mapas.js"></script>
 <script src="abas/membros.js"></script>
 <script src="abas/meses.js"></script>
 <script src="abas/partidas.js"></script>
 <script src="abas/plano-demos.js"></script>
-<script src="abas/plano.js"></script>
+<script src="abas/plano-mapa.js"></script>
+<script src="abas/time-extras.js"></script>
 <script src="abas/visao-topo.js"></script>
 <script src="abas/visao.js"></script>
 <script src="abas/zz-extras.js"></script>

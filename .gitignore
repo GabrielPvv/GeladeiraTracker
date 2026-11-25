@@ -1,0 +1,10 @@
+# Regra de licença/termos (25/11/2026): conteúdo do nades.ai (termos proíbem copiar/redistribuir) nunca sobe.
+# abas/granadas-pros.js voltou a ser publicável: desde 25/11 só tem vídeos do YouTube (id, título, canal, início,
+# tipo, lado), sem nada do nades.ai; o teste do projeto falha se "nades.ai" aparecer no site.
+
+# Sistema e editores
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+

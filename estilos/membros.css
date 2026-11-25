@@ -1,14 +1,54 @@
-/* Aba Membros: cards de membro. */
-/* cartões de jogador */
-.pcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 10px; }
-.pc { background: var(--card2); border: 1px solid var(--borda); border-radius: 10px; padding: 12px; display: grid; gap: 6px; min-width: 0; color: inherit; text-decoration: none; transition: transform .15s, border-color .15s; }
-.cartao-link { cursor: pointer; }
-.cartao-link:hover { border-color: var(--acento); transform: translateY(-2px); }
-.pc strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pc .grande { font-size: 1.8rem; }
-.pc .mini { justify-content: space-between; }
-.gcards { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
-
-.pc-nome { display: inline-flex; align-items: center; gap: 8px; overflow: hidden; } .pc-nome span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Aba Jogadores, lista (U6): tabela única em dois grupos de colunas, líder da coluna (peso 700 + ponto de 6 px), recolhidos. */
 .titulo-membro { display: flex; align-items: center; gap: 12px; }
 a.btn { color: var(--fg); text-decoration: none; display: inline-flex; align-items: center; }
+
+.jl-seletor { display: none; align-items: center; gap: 6px; margin-bottom: 10px; font-size: .85rem; color: var(--mudo); }
+.jl-seletor select { min-height: 36px; }
+.jl-membro { display: inline-flex; align-items: center; gap: 8px; color: var(--fg); font-weight: 600; }
+.jl-membro:hover { color: var(--acento); }
+.jl-tab td { text-align: right; }
+.jl-tab th, .jl-tab td { padding-left: 6px; padding-right: 6px; }
+.jl-tab th:first-child, .jl-tab td:first-child { padding-left: 10px; }
+.jl-spark svg { width: 48px; height: 22px; }
+.jl-tab td.jl-nick, .jl-tab th.jl-nick { text-align: left; }
+.jl-tab td.jl-sem { color: var(--mudo); cursor: help; }
+/* o 2º cabeçalho (grupos) não gruda: só a linha de colunas fica presa ao topo */
+.jl-tab thead tr.jl-grupo th { position: static; height: auto; background: var(--card2); border-bottom: 0; text-align: center; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; padding: 6px 10px 2px; }
+.jl-tab thead tr.jl-grupo th.jl-nick { position: sticky; left: 0; z-index: 4; }
+.jl-tab thead tr.jl-grupo .jl-g-filtro { border-bottom: 1px solid var(--borda); }
+.jl-tab thead tr.jl-grupo .selo { margin-left: 0; margin-right: 4px; }
+.jl-tab thead tr:not(.jl-grupo) th { top: 0; }
+.jl-tab thead tr.jl-grupo th.jl-g-av { border-left: 1px solid var(--borda); }
+
+/* líder da coluna: número em peso 700 e um ponto de 6 px antes (sem medalha, sem cor de calor) */
+.jl-lider { font-weight: 700; color: var(--fg); position: relative; }
+.jl-lider::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%; background: var(--acento); vertical-align: middle; }
+
+/* forma: sparkline de ADR e seta numa coluna estreita (a seta é semântica: verde acima, vermelho abaixo) */
+.jl-forma { display: inline-flex; align-items: center; gap: 6px; }
+.jl-spark { display: inline-flex; width: 48px; height: 22px; }
+.jl-seta { font-size: 14px; font-weight: 700; line-height: 1; min-width: 1ch; text-align: center; }
+.jl-seta.ok { color: var(--ok); } .jl-seta.bad { color: var(--bad); } .jl-seta.neutra { color: var(--mudo); }
+
+/* recolhidos: Mapa de estilos, Win rate mês a mês, Como é calculado */
+.jl-rec > summary { cursor: pointer; list-style: none; min-height: 40px; display: flex; align-items: center; gap: 4px 6px; flex-wrap: wrap; }
+.jl-rec > summary::-webkit-details-marker { display: none; }
+.jl-rec > summary::before { content: "▸"; color: var(--mudo); margin-right: 4px; }
+.jl-rec[open] > summary::before { content: "▾"; }
+.jl-rec > summary:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+.jl-rec > summary .card-t { color: var(--fg); font-weight: 700; font-size: 1.05rem; }
+.jl-rec[open] > summary { margin-bottom: 8px; }
+.jl-rec > :not(summary) + :not(summary) { margin-top: 10px; }
+
+/* celular: Jogador, Partidas, a coluna escolhida no seletor e a Forma, sem rolagem lateral */
+@media (max-width: 640px) {
+  .jl-seletor { display: flex; }
+  .jl-rolar { overflow-x: visible; max-height: none; }
+  .jl-tab thead tr.jl-grupo { display: none; }
+  .jl-tab th:not(.jl-vis), .jl-tab td:not(.jl-vis):not(.jl-nick) { display: none; }
+  .jl-tab th, .jl-tab td { padding-left: 4px; padding-right: 4px; }
+  .jl-spark, .jl-spark svg { width: 44px; }
+  .jl-tab .info { display: none; }
+  .jl-tab td.jl-nick, .jl-tab th.jl-nick { position: static; box-shadow: none; }
+  .jl-membro span:last-child { overflow: hidden; text-overflow: ellipsis; max-width: 8ch; white-space: nowrap; }
+}

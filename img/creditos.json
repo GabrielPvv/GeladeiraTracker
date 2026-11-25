@@ -1,0 +1,119 @@
+{
+  "icones": {
+    "credito": "Ícones de mapa do Counter-Strike 2 (Valve), via MurkyYT/cs2-map-icons",
+    "fonte": "https://github.com/MurkyYT/cs2-map-icons",
+    "observacao": "Arte oficial da Valve, uso tolerado com crédito; cobblestone reduzido de 512 para 40 px"
+  },
+  "fundos": [
+    {
+      "mapa": "ancient",
+      "titulo": "Captura oficial de de_ancient (Counter-Strike 2)",
+      "credito": "Imagem: Valve (Counter-Strike 2)",
+      "origem": "https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main/images/thumbs/de_ancient_1_png.png",
+      "repositorio": "https://github.com/MurkyYT/cs2-map-icons",
+      "licenca": "Arte da Valve; uso tolerado com crédito (sem licença aberta)",
+      "urlLicenca": null,
+      "arquivo": "mapas-fundo/ancient.jpg"
+    },
+    {
+      "mapa": "anubis",
+      "titulo": "Captura oficial de de_anubis (Counter-Strike 2)",
+      "credito": "Imagem: Valve (Counter-Strike 2)",
+      "origem": "https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main/images/thumbs/de_anubis_1_png.png",
+      "repositorio": "https://github.com/MurkyYT/cs2-map-icons",
+      "licenca": "Arte da Valve; uso tolerado com crédito (sem licença aberta)",
+      "urlLicenca": null,
+      "arquivo": "mapas-fundo/anubis.jpg"
+    },
+    {
+      "mapa": "cache",
+      "titulo": "Captura oficial de de_cache (Counter-Strike 2)",
+      "credito": "Imagem: Valve (Counter-Strike 2)",
+      "origem": "https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main/images/thumbs/de_cache_1_png.png",
+      "repositorio": "https://github.com/MurkyYT/cs2-map-icons",
+      "licenca": "Arte da Valve; uso tolerado com crédito (sem licença aberta)",
+      "urlLicenca": null,
+      "arquivo": "mapas-fundo/cache.jpg"
+    },
+    {
+      "mapa": "cobblestone",
+      "titulo": "Captura oficial de de_cbble (Counter-Strike 2)",
+      "credito": "Imagem: Valve (Counter-Strike 2)",
+      "origem": "https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main/images/thumbs/de_cbble_png.png",
+      "repositorio": "https://github.com/MurkyYT/cs2-map-icons",
+      "licenca": "Arte da Valve; uso tolerado com crédito (sem licença aberta)",
+      "urlLicenca": null,
+      "arquivo": "mapas-fundo/cobblestone.jpg"
+    },
+    {
+      "mapa": "dust2",
+      "titulo": "Captura oficial de de_dust2 (Counter-Strike 2)",
+      "credito": "Imagem: Valve (Counter-Strike 2)",
+      "origem": "https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main/images/thumbs/de_dust2_1_png.png",
+      "repositorio": "https://github.com/MurkyYT/cs2-map-icons",
+      "licenca": "Arte da Valve; uso tolerado com crédito (sem licença aberta)",
+      "urlLicenca": null,
+      "arquivo": "mapas-fundo/dust2.jpg"
+    },
+    {
+      "mapa": "inferno",
+      "titulo": "Captura oficial de de_inferno (Counter-Strike 2)",
+      "credito": "Imagem: Valve (Counter-Strike 2)",
+      "origem": "https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main/images/thumbs/de_inferno_1_png.png",
+      "repositorio": "https://github.com/MurkyYT/cs2-map-icons",
+      "licenca": "Arte da Valve; uso tolerado com crédito (sem licença aberta)",
+      "urlLicenca": null,
+      "arquivo": "mapas-fundo/inferno.jpg"
+    },
+    {
+      "mapa": "mirage",
+      "titulo": "Captura oficial de de_mirage (Counter-Strike 2)",
+      "credito": "Imagem: Valve (Counter-Strike 2)",
+      "origem": "https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main/images/thumbs/de_mirage_1_png.png",
+      "repositorio": "https://github.com/MurkyYT/cs2-map-icons",
+      "licenca": "Arte da Valve; uso tolerado com crédito (sem licença aberta)",
+      "urlLicenca": null,
+      "arquivo": "mapas-fundo/mirage.jpg"
+    },
+    {
+      "mapa": "nuke",
+      "titulo": "Captura oficial de de_nuke (Counter-Strike 2)",
+      "credito": "Imagem: Valve (Counter-Strike 2)",
+      "origem": "https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main/images/thumbs/de_nuke_1_png.png",
+      "repositorio": "https://github.com/MurkyYT/cs2-map-icons",
+      "licenca": "Arte da Valve; uso tolerado com crédito (sem licença aberta)",
+      "urlLicenca": null,
+      "arquivo": "mapas-fundo/nuke.jpg"
+    },
+    {
+      "mapa": "overpass",
+      "titulo": "Captura oficial de de_overpass (Counter-Strike 2)",
+      "credito": "Imagem: Valve (Counter-Strike 2)",
+      "origem": "https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main/images/thumbs/de_overpass_1_png.png",
+      "repositorio": "https://github.com/MurkyYT/cs2-map-icons",
+      "licenca": "Arte da Valve; uso tolerado com crédito (sem licença aberta)",
+      "urlLicenca": null,
+      "arquivo": "mapas-fundo/overpass.jpg"
+    },
+    {
+      "mapa": "train",
+      "titulo": "Captura oficial de de_train (Counter-Strike 2)",
+      "credito": "Imagem: Valve (Counter-Strike 2)",
+      "origem": "https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main/images/thumbs/de_train_1_png.png",
+      "repositorio": "https://github.com/MurkyYT/cs2-map-icons",
+      "licenca": "Arte da Valve; uso tolerado com crédito (sem licença aberta)",
+      "urlLicenca": null,
+      "arquivo": "mapas-fundo/train.jpg"
+    },
+    {
+      "mapa": "vertigo",
+      "titulo": "Captura oficial de de_vertigo (Counter-Strike 2)",
+      "credito": "Imagem: Valve (Counter-Strike 2)",
+      "origem": "https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main/images/thumbs/de_vertigo_1_png.png",
+      "repositorio": "https://github.com/MurkyYT/cs2-map-icons",
+      "licenca": "Arte da Valve; uso tolerado com crédito (sem licença aberta)",
+      "urlLicenca": null,
+      "arquivo": "mapas-fundo/vertigo.jpg"
+    }
+  ]
+}

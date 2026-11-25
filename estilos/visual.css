@@ -1,89 +1,59 @@
-/* Camada visual: fundo com brilhos e pontos, cards com cor própria (--cor, distribuída pelo núcleo entre --c1 e --c6),
-   faixa de título das páginas, botão de tema com texto, Resumo da Análise, "De onde vêm os números" e botão de voltar ao topo.
+/* Camada visual (V1: cor só com significado; fundo e cards lisos): faixa de título das páginas, botão de tema com texto, Resumo da Análise, "De onde vêm os números" e botão de voltar ao topo.
    Só tokens do base.css; vale para os dois temas. */
 
-/* ---------- fundo ---------- */
-body {
-  background:
-    radial-gradient(1100px 620px at 8% -8%, color-mix(in srgb, var(--c1) calc(var(--fundo-brilho) * 100%), transparent), transparent 62%),
-    radial-gradient(900px 560px at 100% 4%, color-mix(in srgb, var(--c2) calc(var(--fundo-brilho) * 90%), transparent), transparent 60%),
-    radial-gradient(900px 700px at 55% 108%, color-mix(in srgb, var(--c6) calc(var(--fundo-brilho) * 70%), transparent), transparent 60%),
-    var(--bg);
-  background-attachment: fixed;
-  min-height: 100vh;
-}
-body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background-image: radial-gradient(var(--fundo-ponto) 1px, transparent 1.2px); background-size: 22px 22px; }
+/* ---------- fundo: liso (sem brilhos nem pontos) ---------- */
+body { min-height: 100vh; }
 
 /* ---------- topo ---------- */
-.topo { background: color-mix(in srgb, var(--bg) 82%, transparent); border-bottom: 0; }
-.topo::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; opacity: .85;
-  background: linear-gradient(90deg, var(--c1), var(--c2), var(--c3), var(--c4), var(--c5), var(--c6)); }
-.abas a[aria-current="page"] { color: var(--fg); box-shadow: none;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--c1) 30%, var(--card2)), color-mix(in srgb, var(--c2) 26%, var(--card2))); }
+.topo { background: color-mix(in srgb, var(--bg) 92%, transparent); border-bottom: 1px solid var(--borda); }
 .btn-tema { display: inline-flex; align-items: center; gap: 6px; }
 .btn-tema .tema-ico { font-size: 1.05em; line-height: 1; }
 @media (max-width: 480px) { .btn-tema .tema-txt { display: none; } }
 
-/* ---------- cards ---------- */
-.card { --cor: var(--c1);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--cor) 9%, var(--card)) 0, var(--card) 150px);
-  box-shadow: inset 0 3px 0 var(--cor), 0 6px 22px rgba(0, 0, 0, .12);
-  border-color: color-mix(in srgb, var(--cor) 22%, var(--borda)); }
+/* ---------- cards: fundo liso, uma cor só, sem sombra, sem quadradinho antes do título ---------- */
+.card { box-shadow: none; }
 .card > h2 { display: flex; align-items: center; gap: 8px; }
-.card > h2::before { content: ""; width: 10px; height: 10px; border-radius: 3px; flex: none;
-  background: var(--cor); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor) 22%, transparent); }
-.sub { background: color-mix(in srgb, var(--cor, var(--c1)) 6%, var(--card2)); }
-.barra i { background: linear-gradient(90deg, var(--c1), var(--c2)); }
+.sub { background: var(--card2); }
+.barra i { background: var(--acento); }
 .barra i.bom { background: var(--ok); } .barra i.ruim { background: var(--bad); }
 
 /* ---------- faixa de título das páginas (Home, Visão geral, Análise...) ---------- */
-.cabeca:has(> h1):not(.jogador-card) { position: relative; overflow: hidden; padding: 20px 22px; border-radius: 16px;
-  border: 1px solid color-mix(in srgb, var(--c2) 26%, var(--borda));
-  background:
-    radial-gradient(500px 220px at 100% 0%, color-mix(in srgb, var(--c3) 22%, transparent), transparent 70%),
-    linear-gradient(120deg, color-mix(in srgb, var(--c1) 22%, var(--card)), color-mix(in srgb, var(--c2) 18%, var(--card)) 60%, var(--card)); }
-.cabeca:has(> h1):not(.jogador-card) h1 { font-size: 2rem;
-  background: linear-gradient(90deg, var(--fg) 40%, var(--c1)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.jogador-card { background:
-  radial-gradient(420px 240px at 100% 50%, color-mix(in srgb, var(--c2) 16%, transparent), transparent 70%),
-  linear-gradient(120deg, color-mix(in srgb, var(--c1) 12%, var(--card)), var(--card));
-  border-color: color-mix(in srgb, var(--c1) 26%, var(--borda)); }
-.jc-num { background: color-mix(in srgb, var(--c1) 7%, var(--card2)); }
-.jc-num:nth-child(2) { background: color-mix(in srgb, var(--c2) 8%, var(--card2)); }
-.jc-num:nth-child(3) { background: color-mix(in srgb, var(--c6) 8%, var(--card2)); }
+.cabeca:has(> h1):not(.jogador-card) { padding: 18px 20px; border-radius: 8px; border: 1px solid var(--borda); background: var(--card); }
+.cabeca:has(> h1):not(.jogador-card) h1 { font-size: 28px; }
+@media (max-width: 480px) { .cabeca:has(> h1):not(.jogador-card) { padding: 14px 12px; } .cabeca:has(> h1):not(.jogador-card) h1 { font-size: 22px; } }
+.jogador-card { background: var(--card); border-color: var(--borda); }
+.jc-num { background: var(--card2); }
 
 /* pílulas de números na faixa */
 .pilulas { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .pilula { display: inline-flex; align-items: baseline; gap: 6px; padding: 5px 12px; border-radius: 999px; font-size: .85rem; color: var(--mudo);
-  background: color-mix(in srgb, var(--p, var(--c1)) 14%, var(--card)); border: 1px solid color-mix(in srgb, var(--p, var(--c1)) 35%, transparent); }
-.pilula b { color: var(--fg); font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+  background: var(--card2); border: 1px solid var(--borda); }
+.pilula b { color: var(--fg); font-size: 1.05rem; font-family: var(--fonte-num); font-variant-numeric: tabular-nums; }
 
 /* ---------- Resumo da Análise ---------- */
 .rs { display: grid; gap: 14px; }
 .rs-base { display: flex; flex-wrap: wrap; gap: 8px; }
 .rs-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
-.rs-kpi { --k: var(--c1); border-radius: 12px; padding: 12px; display: grid; gap: 6px; min-width: 0;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--k) 16%, var(--card2)), var(--card2));
-  border: 1px solid color-mix(in srgb, var(--k) 30%, var(--borda)); }
+.rs-kpi { border-radius: 8px; padding: 12px; display: grid; gap: 6px; min-width: 0;
+  background: var(--card2); border: 1px solid var(--borda); }
 .rs-kpi-topo { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
 .rs-kpi-v { font-size: 1.9rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; font-family: var(--fonte-num, inherit); }
-.rs-dif { font-size: .72rem; font-weight: 700; border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
+.rs-dif { font-size: .75rem; font-weight: 700; border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
 .rs-dif.ok { background: color-mix(in srgb, var(--ok) 18%, transparent); }
 .rs-dif.bad { background: color-mix(in srgb, var(--bad) 18%, transparent); }
 .rs-dif.neutro { background: var(--grade); color: var(--mudo); }
-.rs-cmp { display: grid; gap: 4px; font-size: .72rem; color: var(--mudo); }
+.rs-cmp { display: grid; gap: 4px; font-size: .75rem; color: var(--mudo); }
 .rs-cmp div { display: grid; grid-template-columns: 3.4em 1fr; gap: 6px; align-items: center; }
 .rs-trilho { height: 7px; border-radius: 4px; background: var(--grade); overflow: hidden; }
 .rs-trilho i { display: block; height: 100%; border-radius: 4px; }
-.rs-trilho .eu { background: var(--k); }
+.rs-trilho .eu { background: var(--acento); }
+.rs-kpi[style*="var(--tr)"] .eu { background: var(--tr); } .rs-kpi[style*="var(--ct)"] .eu { background: var(--ct); }
 .rs-trilho .ref { background: var(--ref); opacity: .7; }
 .rs-destaques { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 10px; }
-.rs-dest { --k: var(--c1); border-radius: 12px; padding: 12px 14px; display: grid; gap: 4px; align-content: start;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--k) 20%, var(--card2)), var(--card2));
-  border-left: 4px solid var(--k); }
-.rs-dest.forte { --k: var(--ok); } .rs-dest.fraco { --k: var(--bad); } .rs-dest.funcao { --k: var(--c2); }
-.rs-dest .rot { color: var(--k); font-weight: 700; }
+.rs-dest { --k: var(--borda); border-radius: 8px; padding: 12px 14px; display: grid; gap: 4px; align-content: start;
+  background: var(--card2); border-left: 3px solid var(--k); }
+.rs-dest.forte { --k: var(--ok); } .rs-dest.fraco { --k: var(--aviso); } .rs-dest.funcao { --k: var(--acento); }
+.rs-dest .rot { color: var(--mudo); font-weight: 700; }
 .rs-dest b { font-size: 1.1rem; }
 .rs-dest small { color: var(--mudo); }
 .rs-placar { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -95,28 +65,28 @@ body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-even
 
 /* ---------- De onde vêm os números ---------- */
 .or-nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
-.or-num { --k: var(--c1); border-radius: 12px; padding: 12px; display: grid; gap: 2px;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--k) 18%, var(--card2)), var(--card2)); border: 1px solid color-mix(in srgb, var(--k) 30%, var(--borda)); }
+.or-num { --k: var(--c1); border-radius: 8px; padding: 12px; display: grid; gap: 2px;
+  background: var(--card2); border: 1px solid var(--borda); }
 .or-num b { font-size: 1.9rem; line-height: 1.05; font-variant-numeric: tabular-nums; font-family: var(--fonte-num, inherit); }
 .or-num small { color: var(--mudo); font-size: .8rem; }
 .or-proporcao { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--grade); }
 .or-proporcao i { display: block; height: 100%; }
 .or-cob { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 10px; }
-.or-grupo { border-radius: 12px; padding: 10px 12px; display: grid; gap: 8px; align-content: start; background: var(--card2); border: 1px solid var(--borda); }
+.or-grupo { border-radius: 8px; padding: 10px 12px; display: grid; gap: 8px; align-content: start; background: var(--card2); border: 1px solid var(--borda); }
 .or-grupo.cheio { border-color: color-mix(in srgb, var(--ok) 45%, var(--borda)); background: color-mix(in srgb, var(--ok) 7%, var(--card2)); }
 .or-grupo.parcial { border-color: color-mix(in srgb, var(--aviso) 45%, var(--borda)); background: color-mix(in srgb, var(--aviso) 7%, var(--card2)); }
 .or-grupo h3 { font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; display: flex; align-items: center; gap: 6px; }
 .or-grupo.cheio h3 { color: var(--ok); } .or-grupo.parcial h3 { color: var(--aviso); }
 .or-grupo p { margin: 0; font-size: .8rem; color: var(--mudo); }
 .or-regras { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 8px; }
-.or-regras li { display: grid; grid-template-columns: 28px 1fr; gap: 8px; align-items: start; font-size: .84rem; color: var(--mudo); padding: 8px 10px; border-radius: 10px; background: var(--card2); }
+.or-regras li { display: grid; grid-template-columns: 28px 1fr; gap: 8px; align-items: start; font-size: .84rem; color: var(--mudo); padding: 8px 10px; border-radius: 8px; background: var(--card2); }
 .or-regras li b { color: var(--fg); font-weight: 600; }
 .or-ico { width: 28px; height: 28px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: .95rem;
-  background: color-mix(in srgb, var(--k, var(--c1)) 20%, transparent); color: var(--k, var(--c1)); font-weight: 700; }
+  background: color-mix(in srgb, var(--acento) 16%, transparent); color: var(--acento); font-weight: 700; }
 
 /* ---------- voltar ao topo ---------- */
 .voltar-topo { position: fixed; right: 18px; bottom: 18px; z-index: 40; width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer;
-  color: #fff; font-size: 1.2rem; background: linear-gradient(135deg, var(--c1), var(--c2)); box-shadow: var(--sombra);
-  opacity: 0; transform: translateY(10px); pointer-events: none; transition: opacity .2s, transform .2s; }
-.voltar-topo.ver { opacity: 1; transform: none; pointer-events: auto; }
+  color: var(--bg); font-size: 1.2rem; background: var(--acento); box-shadow: var(--sombra);
+  opacity: 0; transform: translateY(10px); pointer-events: none; visibility: hidden; transition: opacity .2s, transform .2s, visibility 0s linear .2s; }
+.voltar-topo.ver { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition-delay: 0s; }
 html.z-tv .voltar-topo { display: none; }

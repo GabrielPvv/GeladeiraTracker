@@ -1,0 +1,20 @@
+/* Time: dia e horário, reação depois de sequência, duplas. */
+.te-dois { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px 24px; }
+.te-grupo { min-width: 0; display: grid; gap: 8px; align-content: start; }
+.te-grupo h3 { margin: 0; }
+.te-rank > div { grid-template-columns: 9.5em minmax(40px, 1fr) auto; }
+.te-rank .nome { white-space: nowrap; font-size: .85rem; }
+.te-rank em b { font-weight: 700; }
+.te-rank .selo { margin-left: 6px; }
+.te-reacao { display: grid; gap: 6px; }
+.te-frase, .te-base { margin: 0; }
+.te-duplas { display: grid; gap: 8px; }
+.te-dupla { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 14px; padding: 8px 10px; background: var(--card2); border-radius: 8px; min-width: 0; }
+.te-d-num { display: grid; justify-items: end; text-align: right; }
+.te-d-num b { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.te-d-num small { color: var(--mudo); }
+@media (max-width: 480px) {
+  .te-rank > div { grid-template-columns: 6.5em minmax(24px, 1fr) auto; }
+  .te-rank .nome { white-space: normal; font-size: .78rem; }
+  .te-d-num { justify-items: start; text-align: left; }
+}

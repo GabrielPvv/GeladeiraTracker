@@ -1,99 +1,29 @@
-// Extras visuais (frente D): decora a tabela de membros (mini barras, tendência, medalha), números que contam e modo TV.
-// Não registra aba nem bloco: observa o painel e o cabeçalho, sem editar o núcleo nem as outras abas.
+// Extras visuais (frente D): números que contam e modo TV. Não registra aba nem bloco: observa o painel e o cabeçalho, sem editar o núcleo nem as outras abas.
+// U6: a decoração da tabela de membros (mini barras, setas de 30 dias, medalha) saiu; a tabela de Jogadores (membros.js) marca o líder e a forma por conta própria. Decoração futura de tabela deve achar a coluna pelo data-col do th, nunca pelo texto do cabeçalho (A7).
 (function () {
   'use strict';
   const GT = window.GT;
   if (!GT || !GT.u) return;
-  const { h, sv, E, $, pct, n1, n2, pl, dica, infoIcone, miniBarra, reduzMov, avisar, paramsTexto, dados, membrosAno, filtrar, somarDias } = GT.u;
-  const C = GT.C;
+  const { h, E, $, reduzMov, avisar, paramsTexto } = GT.u;
   const painel = $('#painel');
   if (!painel) return;
 
   document.documentElement.classList.add('z-extras');
 
-  // ---------- 1. tabela de membros ----------
-  const MIN_MEDALHA = 10; // partidas mínimas para concorrer à medalha
-  const MIN_TEND = 3; // partidas mínimas nos últimos 30 dias para mostrar tendência
-  const METRICAS = {
-    'K/D': { c: 'kd', f: n2, lim: 0.05, nome: 'K/D' },
-    ADR: { c: 'adr', f: n1, lim: 2, nome: 'ADR' },
-    'HS%': { c: 'hsPct', f: pct, lim: 0.02, nome: 'HS%' },
-    KAST: { c: 'kastPct', f: pct, lim: 0.015, nome: 'KAST' },
-  };
-  const TXT_INFO = 'Seta: compara os últimos 30 dias do ano com o ano todo (precisa de 3 partidas ou mais nos 30 dias; sem seta quando a diferença é pequena). Medalha: melhor da coluna entre quem tem 10 partidas ou mais no filtro. A barra usa o maior valor do grupo como escala.';
-
-  function medalha() {
-    return sv('svg', { class: 'z-medalha', viewBox: '0 0 16 16', width: 13, height: 13, 'aria-hidden': 'true' },
-      sv('path', { d: 'M4 1h3l1 4H5zM12 1H9L8 5h3z', fill: 'var(--acento)' }),
-      sv('circle', { cx: 8, cy: 10.5, r: 4.2, fill: 'var(--aviso)' }),
-      sv('circle', { cx: 8, cy: 10.5, r: 2.2, fill: 'none', stroke: 'var(--card)', 'stroke-width': 1.1 }));
-  }
-
-  function decorarMembros(tabela) {
-    tabela.setAttribute('data-z', '1');
-    const D = dados();
-    const linhasF = C.membros(filtrar().ms, membrosAno());
-    const ano = new Map(C.membros(D.partidas, membrosAno()).map((r) => [r.jogador, r]));
-    const corte = somarDias(D.info.ultima, -30);
-    const rec = new Map(C.membros(D.partidas.filter((m) => m.d >= corte), membrosAno()).map((r) => [r.jogador, r]));
-    const idx = {};
-    tabela.querySelectorAll('thead th').forEach((th, i) => { const t = (th.querySelector('button') || th).childNodes[0]; const nome = t && t.textContent.trim(); if (METRICAS[nome]) idx[nome] = i; });
-    const porNome = new Map(linhasF.map((r) => [r.jogador, r]));
-    for (const [nome, i] of Object.entries(idx)) {
-      const M = METRICAS[nome];
-      const max = Math.max(0, ...linhasF.map((r) => r[M.c]));
-      const elegiveis = linhasF.filter((r) => r.partidas >= MIN_MEDALHA);
-      const melhor = elegiveis.length ? elegiveis.reduce((a, b) => (b[M.c] > a[M.c] ? b : a)) : null;
-      tabela.querySelectorAll('tbody tr').forEach((tr) => {
-        const td = tr.children[i], link = tr.querySelector('a');
-        const r = link && porNome.get(link.textContent.trim());
-        if (!td || !r) return;
-        const txt = td.textContent;
-        td.classList.add('z-cel');
-        const topo = h('span', { class: 'z-v' }, h('span', { class: 'z-num' }, txt));
-        const a = ano.get(r.jogador), c30 = rec.get(r.jogador);
-        if (a && c30 && c30.partidas >= MIN_TEND) {
-          const dif = c30[M.c] - a[M.c];
-          if (Math.abs(dif) >= M.lim) {
-            const sobe = dif > 0;
-            const seta = h('span', { class: 'z-seta ' + (sobe ? 'ok' : 'bad') }, sobe ? '↑' : '↓');
-            dica(seta, () => `${M.nome} nos últimos 30 dias: ${M.f(c30[M.c])} (${pl(c30.partidas, 'partida', 'partidas')}), contra ${M.f(a[M.c])} no ano.`);
-            topo.append(seta);
-          }
-        }
-        if (melhor && melhor.jogador === r.jogador) {
-          const m = h('span', { class: 'z-med' }, medalha());
-          dica(m, () => `Melhor ${M.nome} do grupo (mínimo de ${MIN_MEDALHA} partidas).`);
-          topo.append(m);
-        }
-        td.replaceChildren(topo);
-        miniBarra(td, r[M.c], max, {});
-      });
-    }
-    const nota = tabela.closest('.card') && tabela.closest('.card').querySelector('.nota');
-    if (nota && !nota.querySelector('.z-info')) { const i = infoIcone(TXT_INFO); i.classList.add('z-info'); nota.append(' ', i); }
-  }
-
-  function varrerMembros() {
-    if (E.aba !== 'visao') return;
-    const t = painel.querySelector('[data-bloco="membros"] table:not([data-z])');
-    if (t) { try { decorarMembros(t); } catch (e) { console.error(e); } }
-  }
-
-  // ---------- 2. números que contam ----------
+  // ---------- 1. números que contam ----------
   const jaContou = new Set();
   function contar() {
     if (reduzMov()) return;
     const chave = E.aba;
     if (jaContou.has(chave)) return;
-    const alvos = [...painel.querySelectorAll('.grande, .anel text, .seq b, .dest-nome')].filter((el) => !el.children.length && /^\d+(\.\d+)?/.test(el.textContent.trim()));
+    const alvos = [...painel.querySelectorAll('.grande, .anel text, .seq b, .dest-nome')].filter((el) => !el.children.length && /^\d+(?:[.]\d{3})*(?:,\d+)?/.test(el.textContent.trim()));
     if (!alvos.length) return;
     jaContou.add(chave);
-    const itens = alvos.map((el) => { const m = el.textContent.trim().match(/^(\d+(?:\.\d+)?)(.*)$/); return { el, fim: el.textContent, v: parseFloat(m[1]), dec: (m[1].split('.')[1] || '').length, suf: m[2] }; });
+    const itens = alvos.map((el) => { const m = el.textContent.trim().match(/^(\d+(?:[.]\d{3})*(?:,\d+)?)(.*)$/); return { el, fim: el.textContent, v: parseFloat(m[1].replace(/[.]/g, '').replace(',', '.')), dec: (m[1].split(',')[1] || '').length, suf: m[2] }; });
     const t0 = performance.now(), DUR = 600;
     const passo = (agora) => {
       const f = Math.min(1, (agora - t0) / DUR), e = 1 - Math.pow(1 - f, 3);
-      for (const it of itens) it.el.textContent = f >= 1 ? it.fim : (it.v * e).toFixed(it.dec) + it.suf;
+      for (const it of itens) it.el.textContent = f >= 1 ? it.fim : GT.u.num(it.v * e, it.dec) + it.suf;
       if (f < 1) requestAnimationFrame(passo);
     };
     requestAnimationFrame(passo);
@@ -103,12 +33,12 @@
   function aoMudar() {
     if (agendado) return;
     agendado = true;
-    requestAnimationFrame(() => { agendado = false; varrerMembros(); contar(); });
+    requestAnimationFrame(() => { agendado = false; contar(); });
   }
   new MutationObserver(aoMudar).observe(painel, { childList: true, subtree: true });
   aoMudar();
 
-  // ---------- 3. modo TV ----------
+  // ---------- 2. modo TV ----------
   const INTERVALO = 20000;
   let tv = null;
   function abasTv() { return GT.abas.filter((a) => !a.oculta).sort((x, y) => x.ordem - y.ordem); }

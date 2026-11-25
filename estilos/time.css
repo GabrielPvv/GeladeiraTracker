@@ -1,0 +1,26 @@
+/* U7: aba Time (Evolução, Lines) e página Sobre os dados. Usa só os tokens da paleta (base.css e visual.css). */
+.tm-resumo { gap: 8px; }
+.tm-nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 8px 14px; }
+.tm-num { display: grid; gap: 2px; min-width: 0; }
+.tm-num b { font-size: 1.5rem; line-height: 1.1; font-variant-numeric: tabular-nums; font-weight: 700; }
+.tm-rec { background: var(--card); border: 1px solid var(--borda); border-radius: var(--raio); }
+.tm-rec > summary { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 12px 14px; min-height: 44px; cursor: pointer; list-style: none; }
+.tm-rec > summary::-webkit-details-marker { display: none; }
+.tm-rec > summary::before { content: "▸"; color: var(--mudo); }
+.tm-rec[open] > summary::before { content: "▾"; }
+.tm-rec > summary:focus-visible { outline: 2px solid var(--acento); outline-offset: -2px; }
+.tm-rec-t { font-weight: 600; }
+.tm-rec-corpo { padding: 0 12px 12px; }
+.tm-rec-corpo > .card { border: 0; padding: 0; background: none; }
+.tm-rec-corpo > .grade2 > .card { background: var(--card2); }
+
+.sb-escada { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.sb-degrau { --k: var(--acento); display: grid; gap: 4px; padding: 10px 12px; border-radius: 8px; background: var(--card2); border-left: 3px solid var(--k); }
+.sb-topo { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.sb-valor { font-size: 1.6rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.sb-tit { font-weight: 600; }
+.sb-barra { height: 8px; border-radius: 4px; overflow: hidden; background: var(--grade); }
+.sb-barra i { display: block; height: 100%; background: var(--k); }
+.sb-porque { margin-top: 12px; }
+.sb-calculo { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: .88rem; color: var(--mudo); line-height: 1.45; }
+.sb-calculo b { color: var(--fg); font-weight: 600; }

@@ -1,4 +1,4 @@
-// Aba "Lines": quadro de lineup arrastável (banco, 5 vagas do time e "Fora") com resultado ao vivo, e o ranking das lines.
+// Subaba "Lines" da aba Time (U7; item do menu = Time, a rota #lines segue valendo): quadro de lineup arrastável (banco, 5 vagas do time e "Fora") com resultado ao vivo, e o ranking das lines.
 // O quadro vai para o link: #lines/time=a,b,c/fora=x,y. Pointer Events (mouse e toque) e menu por teclado como alternativa ao arrastar.
 (function () {
   'use strict';
@@ -6,7 +6,7 @@
   const { $, h, pct, n1, n2, dataBR, pl, lista, cls, E, UI, dados, membrosAno, card, tabela, cWr, rotuloMembro, avatar, chipsMembros, vazioFiltro, reduzMov, esconderDica, gravarEstado, render, lista_, AMOSTRA, nomeResultado } = GT.u;
   Object.assign(UI, { ordem: 'wr', tam: 0, min: 8, time: [null, null, null, null, null], fora: [], arrastouEm: 0 });
 
-  GT.registrarAba({ id: 'lines', titulo: 'Lines', ordem: 30, aceitaVazio: true,
+  GT.registrarAba({ id: 'lines', titulo: 'Lines', ordem: 31, oculta: true, pai: 'time', aceitaVazio: true,
     rotaLer(resto) {
       const ms = membrosAno();
       for (const seg of resto) {
@@ -38,7 +38,7 @@
       const outro = UI.time[dest.i]; UI.time[dest.i] = n;
       if (outro) { if (orig.z === 'slot') UI.time[orig.i] = outro; else if (orig.z === 'fora') UI.fora.push(outro); }
       anunciar(`${n} no time, vaga ${dest.i + 1}${outro ? `; ${outro} saiu da vaga` : ''}`);
-    } else if (dest.z === 'fora') { UI.fora.push(n); anunciar(`${n} fora: só partidas sem ele`); }
+    } else if (dest.z === 'fora') { UI.fora.push(n); anunciar(`${n} fora: só partidas sem esse membro`); }
     else anunciar(`${n} de volta ao banco`);
   }
   function carregarLine(nomes) {
@@ -149,7 +149,8 @@
         h('div', null, h('h3', { class: 'rot' }, 'Banco'), banco),
         h('div', null, h('h3', { class: 'rot' }, `Time (${noTime().length}/${VAGAS})`), h('div', { class: 'slots' }, ...slots)),
         h('div', null, h('h3', { class: 'rot' }, 'Fora'), fora),
-        h('div', { class: 'controles' }, h('button', { class: 'btn', type: 'button', onclick: () => { UI.time = Array(VAGAS).fill(null); UI.fora = []; gravarEstado(); desenharLineup(); anunciar('Quadro limpo'); } }, 'Limpar'))),
+        h('div', { class: 'controles' }, h('button', { class: 'btn', type: 'button', onclick: () => { UI.time = Array(VAGAS).fill(null); UI.fora = []; gravarEstado(); desenharLineup(); anunciar('Quadro limpo'); } }, 'Limpar'),
+          noTime().length >= 2 ? h('button', { class: 'btn btn-filtrar-line', type: 'button', title: 'O site todo passa a mostrar só as partidas em que estes membros jogaram juntos', onclick: () => { E.line = [...noTime()]; render(); } }, 'Filtrar o site por esta line') : null)),
       h('div', { class: 'lineup-res' }, ...resultadoLineup(F)));
   }
 
@@ -158,6 +159,8 @@
     ls = ls.sort({ wr: (x, y) => y.wr - x.wr || y.partidas - x.partidas, wrmenor: (x, y) => x.wr - y.wr || y.partidas - x.partidas, partidas: (x, y) => y.partidas - x.partidas || y.wr - x.wr }[UI.ordem]);
     caixaRanking.replaceChildren(ls.length ? tabelaLines(ls.slice(0, 15)) : h('p', { class: 'vazio' }, 'Nenhuma line com esse mínimo de partidas. Baixe o mínimo ou mude o tamanho.'), ls.length > 15 && h('p', { class: 'nota' }, `Mostrando 15 de ${ls.length} lines.`));
   }
+
+  GT.registrarBloco({ aba: 'lines', id: 'subabas', ordem: 1, render(el) { el.append(h('h1', { class: 'so-leitor' }, 'Geladeira Tracker: lines'), GT.u.subabasTime('lines')); } });
 
   GT.registrarBloco({ aba: 'lines', id: 'montador', ordem: 10, render(el, ctx) {
     ultimoF = ctx.F;
@@ -176,6 +179,6 @@
       h('label', null, 'Tamanho', h('select', { onchange: (e) => { UI.tam = Number(e.target.value); atualizarRanking(); } }, ...[['0', 'Todos'], ['2', 'Duplas'], ['3', 'Trios'], ['4', '4 membros'], ['5', 'Time fechado (5)']].map(([v, t]) => h('option', { value: v, selected: String(UI.tam) === v }, t)))),
       h('label', null, 'Mínimo de partidas', h('input', { type: 'number', min: 2, max: 60, step: 1, value: UI.min, onchange: (e) => { UI.min = Math.max(2, Number(e.target.value) || 8); atualizarRanking(); } })));
     atualizarRanking();
-    el.append(card('Ranking das lines', 'Cada linha é um grupo de membros que estava no mesmo time ao mesmo tempo. Clique numa linha para carregá-la no quadro acima. K/D e ADR são dos membros da line. Respeita período e mapa.', ctrl, caixaRanking));
+    el.append(card('Ranking das lines', 'Cada linha é um grupo de membros no mesmo time ao mesmo tempo. Clique numa linha para carregá-la no quadro acima. Respeita período e mapa; as regras de cálculo estão em "Sobre os dados".', ctrl, caixaRanking));
   } });
 })();

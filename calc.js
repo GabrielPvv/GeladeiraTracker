@@ -15,6 +15,16 @@
   }
   const linhaMembro = (x) => ({ ...x, v: x.r === 'V' ? 1 : 0, dd: x.r === 'D' ? 1 : 0 }); // resultado do time do próprio membro
 
+  // Veto por mapa: compara o win rate (wr) com a previsão da GC (esp) usando margem que cresce quando há poucas partidas.
+  // Devolve 'mais' | 'abaixo' | 'amostra' (menos de 10 partidas) | 'neutro'. Função pura (testável pelo Node).
+  const MIN_VETO = 10;
+  function classificarMapa({ n, wr, esp }) {
+    if (!(n >= MIN_VETO)) return 'amostra';
+    if (!Number.isFinite(wr) || !Number.isFinite(esp)) return 'neutro';
+    const dif = wr - esp, margem = Math.max(0.05, Math.sqrt(esp * (1 - esp) / n));
+    return dif >= margem ? 'mais' : dif <= -margem ? 'abaixo' : 'neutro';
+  }
+
   const agrupar = (ms, chave) => { const g = new Map(); for (const m of ms) { const k = chave(m); if (!g.has(k)) g.set(k, []); g.get(k).push(m); } return g; };
   const mesDe = (m) => m.d.slice(0, 7);
   const semMistas = (ms) => ms.filter((m) => !m.mix);
@@ -140,5 +150,279 @@
     return out;
   }
 
-  globalThis.GTCalc = { r, somar, linhaMembro, agrupar, mesDe, semMistas, grupo, meses, mapas, horario, membros, membrosMes, comQuem, somarMembros, comSem, combos, niveis, sequencias, acumulado };
+  globalThis.GTCalc = { r, classificarMapa, MIN_VETO, somar, linhaMembro, agrupar, mesDe, semMistas, grupo, meses, mapas, horario, membros, membrosMes, comQuem, somarMembros, comSem, combos, niveis, sequencias, acumulado };
+})();
+
+// ===== Jogador: forma com tendência e desempenho contra nível (itens 8 e 9) =====
+(function () {
+  'use strict';
+  const C = globalThis.GTCalc;
+  const rd = (x, c = 4) => Number(x.toFixed(c));
+
+  // Forma com tendência: últimas n partidas contra as n anteriores (linhas em ordem de data), só partidas com rodadas.
+  // Somar e dividir no fim. Limiares de diferença mínima (em unidades da métrica; porcentagens em fração).
+  const LIMIARES_FORMA = { adr: 5, kast: 0.03, kd: 0.1, fk: 0.02 };
+  const MET_FORMA = [
+    ['adr', (s) => s.dano / Math.max(1, s.rod)],
+    ['kast', (s) => s.kast / Math.max(1, s.rod)],
+    ['kd', (s) => s.k / Math.max(1, s.m)],
+    ['fk', (s) => s.fk / Math.max(1, s.rod)],
+  ];
+  function tendenciaForma(linhas, opc = {}) {
+    const n = opc.n || 10, lim = { ...LIMIARES_FORMA, ...(opc.limiares || {}) };
+    const l = (linhas || []).filter((x) => x.rod > 0);
+    if (l.length < 2 * n) return { amostra: l.length, ok: false, metricas: [] };
+    const soma = (xs) => xs.reduce((s, x) => ({ k: s.k + (x.k || 0), m: s.m + (x.m || 0), dano: s.dano + (x.dano || 0), rod: s.rod + (x.rod || 0), kast: s.kast + (x.kast || 0), fk: s.fk + (x.fk || 0) }), { k: 0, m: 0, dano: 0, rod: 0, kast: 0, fk: 0 });
+    const ant = soma(l.slice(-2 * n, -n)), ago = soma(l.slice(-n));
+    const metricas = MET_FORMA.map(([id, f]) => {
+      const antes = f(ant), agora = f(ago), dif = rd(agora - antes);
+      const dir = Math.abs(dif) + 1e-9 < lim[id] ? 'estavel' : dif > 0 ? 'sobe' : 'cai';
+      return { id, antes: rd(antes), agora: rd(agora), dif, dir };
+    });
+    return { amostra: l.length, ok: true, metricas };
+  }
+
+  // Desempenho do jogador contra times de nível maior, igual e menor (le - ln, mesmo corte de ±0,3 de niveis). Mistas ficam fora.
+  const MIN_NIVEL_ADV = 5, CORTE_NIVEL = 0.3;
+  const FAIXAS_ADV = [['forte', 'adversário mais forte', (x) => x > CORTE_NIVEL], ['parecido', 'nível parecido', (x) => x >= -CORTE_NIVEL && x <= CORTE_NIVEL], ['fraco', 'adversário mais fraco', (x) => x < -CORTE_NIVEL]];
+  function porNivelAdversario(ms, nick) {
+    const por = new Map(FAIXAS_ADV.map(([id]) => [id, []]));
+    for (const m of ms || []) {
+      if (m.mix || m.r === 'X' || !Number.isFinite(m.ln) || !Number.isFinite(m.le)) continue;
+      const x = (m.mem || []).find((y) => y.n === nick);
+      if (!x) continue;
+      const dif = Number((m.le - m.ln).toFixed(2));
+      const f = FAIXAS_ADV.find(([, , t]) => t(dif));
+      if (f) por.get(f[0]).push(C.linhaMembro(x));
+    }
+    return FAIXAS_ADV.map(([id, rotulo]) => {
+      const s = C.somar(por.get(id));
+      return { id, rotulo, partidas: s.partidas, v: s.v, d: s.d, wr: s.wr, kd: s.kd, adr: s.adr, amostraPequena: s.partidas < MIN_NIVEL_ADV };
+    });
+  }
+
+  Object.assign(C, { tendenciaForma, LIMIARES_FORMA, porNivelAdversario, MIN_NIVEL_ADV });
+})();
+
+// ===== Time: dia e horário, reação depois de sequência, duplas (itens 10 a 12) =====
+(function () {
+  'use strict';
+  const C = globalThis.GTCalc;
+  const AMOSTRA_TIME = 8; // mínimo de partidas com resultado (ou de ocorrências) para mostrar conclusão
+
+  // Win rate do grupo por dia da semana (domingo = 0 ... sábado = 6), a partir de m.d 'AAAA-MM-DD'.
+  // O dia é calculado em UTC para não depender do fuso da máquina. Devolve sempre os 7 dias (os sem partida vêm com partidas = 0).
+  // comResultado = V + D + E (mistas ficam fora, como em C.grupo); amostra = comResultado >= AMOSTRA_TIME.
+  const NOMES_DIA = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+  function diaDaSemana(d) { const [a, m, dd] = String(d).split('-').map(Number); return new Date(Date.UTC(a, m - 1, dd)).getUTCDay(); }
+  function diaSemana(ms) {
+    return NOMES_DIA.map((nome, dia) => {
+      const g = C.grupo(ms.filter((m) => diaDaSemana(m.d) === dia));
+      return { dia, nome, partidas: g.partidas, v: g.v, d: g.d, e: g.e, mistas: g.mistas, comResultado: g.comResultado, wr: g.wr, amostra: g.comResultado >= AMOSTRA_TIME };
+    });
+  }
+  // Mesma ideia para as 4 faixas de horário (reaproveita C.horario; faixas sem partida somem de lá, aqui voltam com zero).
+  function faixaHorario(ms) {
+    const por = new Map(C.horario(ms).map((x) => [x.faixa, x]));
+    return ['Madrugada (0h–5h)', 'Manhã (6h–11h)', 'Tarde (12h–17h)', 'Noite (18h–23h)'].map((faixa) => {
+      const g = por.get(faixa) || { partidas: 0, v: 0, d: 0, e: 0, mistas: 0, comResultado: 0, wr: 0 };
+      return { faixa, partidas: g.partidas, v: g.v, d: g.d, e: g.e, mistas: g.mistas, comResultado: g.comResultado, wr: g.wr, amostra: g.comResultado >= AMOSTRA_TIME };
+    });
+  }
+
+  // Reação depois de n derrotas (ou n vitórias) seguidas. Usa as partidas sem mistas, na ordem recebida.
+  // Regra: toda partida cujas n anteriores (imediatamente anteriores, sem mistas) foram todas D (ou todas V) é uma "seguinte"; assim,
+  // numa sequência de 4 derrotas a 3ª e a 4ª derrota contam como "seguinte" de D-D (as ocorrências se sobrepõem). Empate quebra a sequência
+  // e uma partida seguinte que terminou empatada não entra na conta (v + d = ocorrências com vencedor).
+  // Devolve { base (win rate geral), aposDerrotas, aposVitorias }, cada um com { ocorrencias, v, d, wr, amostra }.
+  function reacaoSequencia(ms, n = 2) {
+    const ps = C.semMistas(ms), apos = { D: { v: 0, d: 0 }, V: { v: 0, d: 0 } };
+    let v = 0, d = 0;
+    ps.forEach((m, i) => {
+      if (m.r === 'V') v++; else if (m.r === 'D') d++;
+      if (i < n || (m.r !== 'V' && m.r !== 'D')) return;
+      for (const t of ['D', 'V']) {
+        let ok = true; for (let j = i - n; j < i; j++) if (ps[j].r !== t) { ok = false; break; }
+        if (ok) apos[t][m.r === 'V' ? 'v' : 'd']++;
+      }
+    });
+    const fim = (x) => { const o = x.v + x.d; return { ocorrencias: o, v: x.v, d: x.d, wr: C.r(x.v / Math.max(1, o), 4), amostra: o >= AMOSTRA_TIME }; };
+    return { n, base: { partidas: v + d, v, d, wr: C.r(v / Math.max(1, v + d), 4) }, aposDerrotas: fim(apos.D), aposVitorias: fim(apos.V) };
+  }
+
+  // Duplas que funcionam: pares de membros no mesmo time (C.combos tamanho 2; a dupla conta em toda partida em que os dois estão no time,
+  // mesmo com outros membros juntos) com pelo menos `min` partidas e win rate ACIMA do win rate do grupo no mesmo filtro.
+  // Ordena por win rate e depois por partidas; `dif` = win rate da dupla menos o do grupo (em pontos de fração).
+  function duplas(ms, ordem, min = 8, max = 8) {
+    const base = C.grupo(ms).wr;
+    const todas = C.combos(ms, ordem).filter((c) => c.tamanho === 2 && c.partidas >= min);
+    const boas = todas.filter((c) => c.wr > base).map((c) => ({ ...c, dif: C.r(c.wr - base, 4) }))
+      .sort((a, b) => b.wr - a.wr || b.partidas - a.partidas || a.combinacao.localeCompare(b.combinacao));
+    return { base, elegiveis: todas.length, duplas: boas.slice(0, max), acima: boas.length };
+  }
+
+  Object.assign(C, { AMOSTRA_TIME, diaSemana, faixaHorario, reacaoSequencia, duplas });
+})();
+
+// ===== Partidas: sugestão de filtro mais próximo com dados (item 7) =====
+(function () {
+  'use strict';
+  const C = globalThis.GTCalc;
+  // Mesma lógica de filtrar() em nucleo.js: mapa, depois período por data, depois "últimas n".
+  const somarDias = (d, dias) => new Date(Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10)) + dias * 864e5).toISOString().slice(0, 10);
+  const menosMeses = (d, m) => new Date(Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1 - m, +d.slice(8, 10))).toISOString().slice(0, 10);
+  function aplicarFiltro(partidas, per, n, mapas, ultima) {
+    let ms = partidas || [];
+    if (mapas && mapas.length) ms = ms.filter((m) => mapas.includes(m.mp));
+    if (per === '6m' && ultima) { const c = menosMeses(ultima, 6); ms = ms.filter((m) => m.d >= c); }
+    else if (per === '30d' && ultima) { const c = somarDias(ultima, -30); ms = ms.filter((m) => m.d >= c); }
+    return per === 'n' ? ms.slice(-n) : ms;
+  }
+  const NOME_PER = { '30d': 'últimos 30 dias', '6m': 'últimos 6 meses', ano: 'ano todo' };
+  const qtd = (k) => `${k} ${k === 1 ? 'partida' : 'partidas'}`;
+  // Sugestões de filtro com dados quando o filtro atual não tem partida. Cada uma: { tipo: 'periodo' | 'mapa', per, mapas, partidas, rotulo }.
+  // opts: { per, n, mapas, ultima, nomeMapa }. Devolve [] se o filtro atual já tem partida ou se nada ajuda.
+  function sugerirFiltro(partidas, opts) {
+    const { per = 'ano', n = 20, ultima } = opts || {};
+    const mapas = (opts && opts.mapas) || [], nome = (opts && opts.nomeMapa) || ((x) => x);
+    if (aplicarFiltro(partidas, per, n, mapas, ultima).length) return [];
+    const out = [];
+    const maiores = per === '30d' ? ['6m', 'ano'] : per === '6m' ? ['ano'] : [];
+    for (const p of maiores) {
+      const k = aplicarFiltro(partidas, p, n, mapas, ultima).length;
+      if (!k) continue;
+      out.push({ tipo: 'periodo', per: p, mapas: [...mapas], partidas: k, rotulo: mapas.length ? `${mapas.map(nome).join(' + ')}, ${NOME_PER[p]}: ${qtd(k)}` : `${NOME_PER[p][0].toUpperCase()}${NOME_PER[p].slice(1)}: ${qtd(k)}` });
+      break;
+    }
+    if (mapas.length) {
+      const cont = new Map();
+      for (const m of aplicarFiltro(partidas, per, n, [], ultima)) cont.set(m.mp, (cont.get(m.mp) || 0) + 1);
+      let melhor = null;
+      for (const [mp, k] of cont) if (!mapas.includes(mp) && (!melhor || k > melhor.k)) melhor = { mp, k };
+      if (melhor) out.push({ tipo: 'mapa', per, mapas: [melhor.mp], partidas: melhor.k, rotulo: `${nome(melhor.mp)} neste período: ${qtd(melhor.k)}` });
+    }
+    return out;
+  }
+  // Faixa de rodadas em miniatura (lista de partidas): um item por rodada, separador quando o lado troca (intervalo e prorrogação).
+  function faixaMini(jogo) {
+    const rs = (jogo && jogo.rodadas) || [];
+    const itens = rs.map((r, i) => ({ n: r.n, v: !!r.v, sep: i > 0 && rs[i - 1].lado !== r.lado }));
+    const v = itens.filter((x) => x.v).length;
+    return { itens, v, d: itens.length - v };
+  }
+  Object.assign(C, { sugerirFiltro, faixaMini });
+})();
+
+// ===== Comparar jogadores (item 1) =====
+(function () {
+  'use strict';
+  const C = globalThis.GTCalc;
+  const MIN_MAPA_CMP = 3; // partidas do jogador no mapa para mostrar o win rate
+  // Compara dois jogadores nas partidas do filtro (ms em ordem cronológica). Soma e divide no fim (C.somar).
+  function compararJogadores(ms, a, b) {
+    const lado = (nick) => {
+      const lin = [];
+      for (const m of ms) for (const x of m.mem) if (x.n === nick) lin.push({ ...C.linhaMembro(x), pt: m });
+      const s = C.somar(lin);
+      const ult10 = lin.filter((x) => x.rod).slice(-10).map((x) => x.dano / x.rod);
+      const ult5 = lin.filter((x) => x.r === 'V' || x.r === 'D').slice(-5).map((x) => ({ r: x.r, d: x.pt.d, mp: x.pt.mp, sn: x.pt.sn, se: x.pt.se }));
+      const por = new Map();
+      for (const x of lin) { const o = por.get(x.pt.mp) || { partidas: 0, v: 0, d: 0 }; o.partidas++; o.v += x.v; o.d += x.dd; por.set(x.pt.mp, o); }
+      return { nick, partidas: lin.length, tem: lin.length > 0, wr: lin.length ? s.wr : null, kd: lin.length ? s.kd : null, adr: lin.length ? s.adr : null,
+        kast: lin.length ? s.kastPct : null, hs: lin.length ? s.hsPct : null, ult5, adr10: ult10, porMapa: por };
+    };
+    const A = lado(a), B = lado(b);
+    let jv = 0, jd = 0, jp = 0;
+    for (const m of ms) {
+      const xa = m.mem.find((x) => x.n === a), xb = m.mem.find((x) => x.n === b);
+      if (!xa || !xb || xa.l !== xb.l) continue;
+      jp++; if (xa.r === 'V') jv++; else if (xa.r === 'D') jd++;
+    }
+    const mapas = [...new Set([...A.porMapa.keys(), ...B.porMapa.keys()])].map((mapa) => {
+      const f = (L) => { const o = L.porMapa.get(mapa); return o ? { partidas: o.partidas, wr: o.partidas >= MIN_MAPA_CMP && o.v + o.d ? C.r(o.v / (o.v + o.d), 4) : null } : { partidas: 0, wr: null }; };
+      const fa = f(A), fb = f(B);
+      return { mapa, a: fa, b: fb, total: fa.partidas + fb.partidas };
+    }).sort((x, y) => y.total - x.total || x.mapa.localeCompare(y.mapa));
+    const limpa = (L) => { const { porMapa, ...r } = L; return r; };
+    return { a: limpa(A), b: limpa(B), juntos: { partidas: jp, v: jv, d: jd }, mapas, MIN_MAPA: MIN_MAPA_CMP };
+  }
+  // Quem tem o maior valor numa linha (null se empate ou algum lado vazio).
+  function maiorLado(x, y) { return x == null || y == null || x === y ? null : (x > y ? 'a' : 'b'); }
+  Object.assign(C, { compararJogadores, maiorLado, MIN_MAPA_CMP });
+})();
+
+// ===== Filtro de line, busca e compartilhar (itens 2 a 4) =====
+(function () {
+  'use strict';
+  const C = globalThis.GTCalc;
+  const MAX_LINE = 5, MIN_LINE_FILTRO = 2;
+  const semAcento = (s) => String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const p2 = (n) => String(n).padStart(2, '0');
+  const fmt = (v, d) => Number(v).toFixed(d).replace('.', ',');
+  const pct0 = (v) => fmt(v * 100, 0) + '%';
+
+  // Line escolhida: só nicks que são membros do ano, sem repetir, no máximo 5 (pode ter 1 enquanto se escolhe).
+  function normalizarLine(line, membros) {
+    const ok = new Set(membros || []), out = [];
+    for (const n of Array.isArray(line) ? line : []) if (ok.has(n) && !out.includes(n)) out.push(n);
+    return out.slice(0, MAX_LINE);
+  }
+  // O filtro só vale com 2 ou mais jogadores; abaixo disso fica desligado ([]).
+  const lineAtiva = (line) => (Array.isArray(line) && line.length >= MIN_LINE_FILTRO ? line : []);
+  // Partidas em que todos da line jogaram no mesmo time.
+  const filtrarLine = (ms, line) => { const l = lineAtiva(line); return l.length ? C.comSem(ms, l, []) : ms; };
+
+  // "25/11", "25/11/2026", "25-11-26": { dia, mes, ano|null } ou null.
+  function reconhecerData(q) {
+    const m = /^(\d{1,2})[/.\-](\d{1,2})(?:[/.\-](\d{4}|\d{2}))?$/.exec(String(q || '').trim());
+    if (!m) return null;
+    const dia = +m[1], mes = +m[2];
+    if (dia < 1 || dia > 31 || mes < 1 || mes > 12) return null;
+    const ano = m[3] ? (m[3].length === 2 ? 2000 + +m[3] : +m[3]) : null;
+    return { dia, mes, ano };
+  }
+  // Mapas cujo nome, chave ou sigla casa com a busca ("dust", "d2", "mirage").
+  function casarMapa(q, mapas, nomeMapa) {
+    const t = semAcento(q).replace(/\s+/g, '');
+    if (t.length < 2) return [];
+    const nome = nomeMapa || ((x) => x);
+    return (mapas || []).filter((mp) => {
+      const n = semAcento(nome(mp)), k = semAcento(mp);
+      const palavras = n.split(/\s+/).filter(Boolean);
+      const sigla = palavras.length > 1 ? palavras.map((w) => w[0]).join('') : '';
+      return k.includes(t) || n.replace(/\s+/g, '').includes(t) || (sigla && sigla === t) || (palavras.length > 1 && (palavras[0][0] + (palavras[1] || '')) === t);
+    });
+  }
+  const rotuloPartida = (m, nomeMapa) => `${(nomeMapa || ((x) => x))(m.mp)} ${m.sn}–${m.se} · ${m.d.slice(8, 10)}/${m.d.slice(5, 7)} ${p2(m.h)}h`;
+  // Resultados de busca por mapa e por data. opts: { mapas: [chaves], partidas, ano, nomeMapa }.
+  function resultadosBusca(q, opts) {
+    const o = opts || {}, nome = o.nomeMapa || ((x) => x), out = [];
+    for (const mp of casarMapa(q, o.mapas, nome)) out.push({ tipo: 'mapa', mp, rotulo: nome(mp) });
+    const dt = reconhecerData(q);
+    if (dt && (!dt.ano || String(dt.ano) === String(o.ano))) {
+      const sufixo = `-${p2(dt.mes)}-${p2(dt.dia)}`;
+      const dia = (o.partidas || []).filter((m) => m.d && m.d.slice(4) === sufixo && (!o.ano || m.d.slice(0, 4) === String(o.ano)));
+      for (const m of [...dia].sort((a, b) => a.h - b.h).slice(0, 8)) out.push({ tipo: 'partida', m, rotulo: rotuloPartida(m, nome) });
+    }
+    return out;
+  }
+
+  const dataCompleta = (d) => `${d.slice(8, 10)}/${d.slice(5, 7)}/${d.slice(0, 4)}`;
+  // Texto curto para colar no WhatsApp. j = jogo da partida (análise completa).
+  function textoCompartilharPartida(j, link, nomeMapa) {
+    const nome = nomeMapa || ((x) => x);
+    const rating = (x) => { const v = x.rt != null ? +x.rt : (((j.jogadores || []).find((y) => y.n === x.n) || {}).rating); return v != null && Number.isFinite(+v) && +v >= 0 && +v <= 5 ? +v : null; };
+    const cand = (j.placar || []).filter((x) => x.nos).map((x) => ({ x, rt: rating(x) }));
+    cand.sort((a, b) => (b.rt ?? -1) - (a.rt ?? -1) || (b.x.adr || 0) - (a.x.adr || 0));
+    const mvp = cand[0];
+    const mvpTxt = mvp ? `MVP: ${mvp.x.n}${mvp.rt != null ? ` (rating ${fmt(mvp.rt, 2)})` : mvp.x.adr != null ? ` (ADR ${fmt(mvp.x.adr, 1)})` : ''}` : null;
+    return [`Geladeira ${j.sn} x ${j.se} em ${nome(j.mp)} (${dataCompleta(j.d)})`, mvpTxt, link].filter(Boolean).join(' · ');
+  }
+  // dados: { nick, janela, wr (0 a 1), kd, adr }. Números sem valor ficam de fora.
+  function textoCompartilharJogador(dados, link) {
+    const d = dados || {};
+    const nums = [d.wr != null ? `win rate ${pct0(d.wr)}` : null, d.kd != null ? `K/D ${fmt(d.kd, 2)}` : null, d.adr != null ? `ADR ${fmt(d.adr, 1)}` : null].filter(Boolean);
+    return [`${d.nick} na Geladeira${d.janela ? ` (${d.janela})` : ''}${nums.length ? ': ' + nums.join(', ') : ''}`, link].filter(Boolean).join(' · ');
+  }
+  Object.assign(C, { MAX_LINE, normalizarLine, lineAtiva, filtrarLine, reconhecerData, casarMapa, resultadosBusca, textoCompartilharPartida, textoCompartilharJogador });
 })();
